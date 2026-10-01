@@ -1,0 +1,402 @@
+{
+  "scenario": "long",
+  "strategy": "queue-only",
+  "seed": 42,
+  "jobs": 28,
+  "logs": [
+    {
+      "At": 1000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列 2/8 未达高水位 4，维持已就绪 0 人"
+    },
+    {
+      "At": 1000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 0 人无需调整"
+    },
+    {
+      "At": 2000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列 1/8 未达高水位 4，维持已就绪 2 人"
+    },
+    {
+      "At": 2000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列 1/4 未达高水位 2，维持已就绪 0 人"
+    },
+    {
+      "At": 3000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 3000000000,
+      "Class": "gpu",
+      "Action": "scale_up",
+      "From": 1,
+      "To": 3,
+      "Reason": "类别 gpu 队列 2/4 达到高水位 2，按已就绪 1 人扩容到 3（不看速率、不计在途扩容 0 人）"
+    },
+    {
+      "At": 4000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 4000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 距上次容量调整 1s 不足冷却期 3s：本轮保持 3，防止刚扩又缩"
+    },
+    {
+      "At": 5000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 5000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 距上次容量调整 2s 不足冷却期 3s：本轮保持 3，防止刚扩又缩"
+    },
+    {
+      "At": 6000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 6000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 7000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 7000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 8000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 8000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 9000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 9000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 10000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 10000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 2/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 11000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 11000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 2/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 12000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 12000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 2/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+    },
+    {
+      "At": 13000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 13000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 1/4 未达高水位 2，维持已就绪 3 人"
+    },
+    {
+      "At": 14000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 14000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列空但 3 人仍忙碌，已就绪 3 人无需调整"
+    },
+    {
+      "At": 15000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 15000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列空但 3 人仍忙碌，已就绪 3 人无需调整"
+    },
+    {
+      "At": 16000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 16000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列空但 3 人仍忙碌，已就绪 3 人无需调整"
+    },
+    {
+      "At": 17000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 17000000000,
+      "Class": "gpu",
+      "Action": "scale_down",
+      "From": 3,
+      "To": 2,
+      "Reason": "类别 gpu 队列已空，只保留忙碌 2 人与下限 1，缩到 2（不看速率趋势）"
+    },
+    {
+      "At": 18000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 18000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 gpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 19000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 19000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 gpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 20000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 20000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 gpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 21000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 21000000000,
+      "Class": "gpu",
+      "Action": "scale_down",
+      "From": 2,
+      "To": 1,
+      "Reason": "类别 gpu 队列已空，只保留忙碌 1 人与下限 1，缩到 1（不看速率趋势）"
+    },
+    {
+      "At": 22000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 22000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 23000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 23000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    }
+  ],
+  "per_class": {
+    "cpu": {
+      "Submitted": 22,
+      "Completed": 22,
+      "Rejected": 0,
+      "Waited": 5,
+      "TotalWait": 4764333340,
+      "MaxWait": 1962000000
+    },
+    "gpu": {
+      "Submitted": 6,
+      "Completed": 6,
+      "Rejected": 0,
+      "Waited": 6,
+      "TotalWait": 32960000000,
+      "MaxWait": 9668000000
+    }
+  },
+  "total": {
+    "Submitted": 28,
+    "Completed": 28,
+    "Rejected": 0,
+    "Waited": 11,
+    "TotalWait": 37724333340,
+    "MaxWait": 9668000000
+  }
+}

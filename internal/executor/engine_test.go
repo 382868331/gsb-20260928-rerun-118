@@ -9,26 +9,27 @@ import (
 
 func testConfig() Config {
 	return Config{
-		MinWorkers:   2,
-		MaxWorkers:   4,
-		QueueCap:     2,
-		StartupDelay: 2 * time.Second,
-		Tick:         time.Second,
-		Cooldown:     3 * time.Second,
+		Classes: map[string]ClassConfig{
+			"cpu": {Min: 2, Max: 4, QueueCap: 2, StartupDelay: 2 * time.Second},
+			"gpu": {Min: 1, Max: 2, QueueCap: 1, StartupDelay: 3 * time.Second},
+		},
+		Tick:     time.Second,
+		Cooldown: 3 * time.Second,
 	}
 }
 
 func TestStartupDelayAndCompletionAccounting(t *testing.T) {
-	engine := New(testConfig(), decision.NewQueueRateStrategy(2, 4))
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
 	jobs := []Job{
-		{Arrival: 0, Service: 500 * time.Millisecond},
-		{Arrival: 100 * time.Millisecond, Service: 500 * time.Millisecond},
+		{Arrival: 0, Service: 500 * time.Millisecond, Class: "cpu"},
+		{Arrival: 100 * time.Millisecond, Service: 500 * time.Millisecond, Class: "cpu"},
 	}
 
-	_, counters, err := engine.Run(jobs)
+	result, err := engine.Run(jobs)
 	if err != nil {
 		t.Fatal(err)
 	}
+	counters := result.PerClass["cpu"]
 	if counters.Submitted != 2 || counters.Completed != 2 || counters.Rejected != 0 {
 		t.Fatalf("unexpected counters: %+v", counters)
 	}
@@ -38,54 +39,79 @@ func TestStartupDelayAndCompletionAccounting(t *testing.T) {
 	}
 }
 
-func TestRejectsOnlyWhenSaturated(t *testing.T) {
-	engine := New(testConfig(), decision.NewQueueRateStrategy(2, 4))
-	// 2 名工作者在启动中；队列容量 2，因此前 4 个请求被接收，第 5 个必须明确拒绝。
+func TestAffinityConstraint(t *testing.T) {
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
+	// gpu 任务到达时 cpu 工作者已空闲，但适配约束禁止跨类处理：
+	// gpu 工作者 3 秒才就绪，任务必须排队等待同类实例。
 	jobs := []Job{
-		{Arrival: 100 * time.Millisecond, Service: time.Second},
-		{Arrival: 200 * time.Millisecond, Service: time.Second},
-		{Arrival: 300 * time.Millisecond, Service: time.Second},
-		{Arrival: 400 * time.Millisecond, Service: time.Second},
-		{Arrival: 500 * time.Millisecond, Service: time.Second},
+		{Arrival: 2500 * time.Millisecond, Service: 500 * time.Millisecond, Class: "gpu"},
 	}
 
-	_, counters, err := engine.Run(jobs)
+	result, err := engine.Run(jobs)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if counters.Submitted != 5 || counters.Completed != 4 || counters.Rejected != 1 {
-		t.Fatalf("unexpected counters: %+v", counters)
+	gpu := result.PerClass["gpu"]
+	if gpu.Completed != 1 || gpu.Waited != 1 {
+		t.Fatalf("gpu counters = %+v, want 1 completed after waiting for gpu worker", gpu)
+	}
+	if gpu.MaxWait < 500*time.Millisecond {
+		t.Fatalf("gpu MaxWait = %s, want to reflect startup wait", gpu.MaxWait)
+	}
+}
+
+func TestRejectsOnlyWhenClassSaturated(t *testing.T) {
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
+	// cpu：2 名启动中 + 队列容量 2，前 4 个接收，第 5 个拒绝。
+	var jobs []Job
+	for i := 0; i < 5; i++ {
+		jobs = append(jobs, Job{
+			Arrival: time.Duration(i+1) * 100 * time.Millisecond,
+			Service: time.Second,
+			Class:   "cpu",
+		})
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cpu := result.PerClass["cpu"]
+	if cpu.Submitted != 5 || cpu.Completed != 4 || cpu.Rejected != 1 {
+		t.Fatalf("unexpected cpu counters: %+v", cpu)
 	}
 }
 
 func TestDrainAndNoImmediateFlapping(t *testing.T) {
-	engine := New(testConfig(), decision.NewQueueRateStrategy(2, 4))
-	// 短暂过载触发扩容；之后长时间低流量，允许系统回落，但必须经过冷却和低流量确认。
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
 	var jobs []Job
 	for i := 0; i < 12; i++ {
 		jobs = append(jobs, Job{
 			Arrival: 2*time.Second + time.Duration(i)*80*time.Millisecond,
 			Service: 700 * time.Millisecond,
+			Class:   "cpu",
 		})
 	}
 	for i := 0; i < 3; i++ {
 		jobs = append(jobs, Job{
 			Arrival: 7*time.Second + time.Duration(i)*3*time.Second,
 			Service: 300 * time.Millisecond,
+			Class:   "cpu",
 		})
 	}
 
-	logs, counters, err := engine.Run(jobs)
+	result, err := engine.Run(jobs)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if counters.Completed+counters.Rejected != counters.Submitted {
-		t.Fatalf("accounting mismatch: %+v", counters)
+	cpu := result.PerClass["cpu"]
+	if cpu.Completed+cpu.Rejected != cpu.Submitted {
+		t.Fatalf("accounting mismatch: %+v", cpu)
 	}
 
 	var changes []decision.Log
-	for _, entry := range logs {
-		if entry.Action != decision.ActionHold {
+	for _, entry := range result.Logs {
+		if entry.Class == "cpu" && entry.Action != decision.ActionHold {
 			changes = append(changes, entry)
 		}
 	}
@@ -106,5 +132,13 @@ func TestDrainAndNoImmediateFlapping(t *testing.T) {
 	}
 	if !foundDown {
 		t.Fatal("burst cleared but capacity never scaled down")
+	}
+}
+
+func TestUnknownClassRejected(t *testing.T) {
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
+	_, err := engine.Run([]Job{{Arrival: 0, Service: time.Second, Class: "tpu"}})
+	if err == nil {
+		t.Fatal("want error for job class without worker class")
 	}
 }

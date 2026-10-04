@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -106,6 +107,96 @@ func TestConfirmedEffectReleasesStandbyAndKeepsUnstartedQueued(t *testing.T) {
 	if !containsAuditReason(result.Events, AuditRelease, "取消接替执行") {
 		t.Fatalf("standby was not released after effect confirmation: %+v", result.Events)
 	}
+}
+
+func TestReplacementReadyBeforeConfirmationDoesNotExecute(t *testing.T) {
+	cfg := Config{
+		Classes: map[string]ClassConfig{
+			"gpu": {Min: 1, Max: 2, QueueCap: 1, StartupDelay: time.Second},
+		},
+		Tick:          250 * time.Millisecond,
+		Cooldown:      time.Second,
+		Failures:      []Failure{{At: 1500 * time.Millisecond, JobID: 1}},
+		Confirmations: []OutcomeConfirmation{{At: 2500 * time.Millisecond, JobID: 1}},
+	}
+	jobs := []Job{{Arrival: time.Second, Service: time.Second, Class: "gpu"}}
+
+	result, err := New(cfg, decision.NewQueueRateStrategy()).Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, event := range result.Events {
+		if event.Kind == AuditTakeover && event.At < 2500*time.Millisecond {
+			t.Fatalf("replacement executed before confirmation: %+v", event)
+		}
+	}
+	if !containsAuditReason(result.Events, AuditReserveStandby, "已就绪但旧效果尚未确认") {
+		t.Fatalf("missing ready-but-unconfirmed standby audit: %+v", result.Events)
+	}
+	if got := result.PerClass["gpu"]; got.Completed != 1 || got.Unknown != 0 || got.Rejected != 0 {
+		t.Fatalf("unexpected counters: %+v", got)
+	}
+}
+
+func TestLateCompletionAfterObservedEffectIsIgnored(t *testing.T) {
+	cfg := Config{
+		Classes: map[string]ClassConfig{
+			"gpu": {Min: 1, Max: 2, QueueCap: 1, StartupDelay: 500 * time.Millisecond},
+		},
+		Tick:          250 * time.Millisecond,
+		Cooldown:      time.Second,
+		Failures:      []Failure{{At: 1500 * time.Millisecond, JobID: 1}},
+		Confirmations: []OutcomeConfirmation{{At: 1600 * time.Millisecond, JobID: 1, EffectObserved: true}},
+	}
+	jobs := []Job{{Arrival: time.Second, Service: time.Second, Class: "gpu"}}
+
+	result, err := New(cfg, decision.NewQueueRateStrategy()).Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := result.PerClass["gpu"]; got.Completed != 1 || got.Unknown != 0 {
+		t.Fatalf("late completion changed accounting: %+v", got)
+	}
+	if len(auditKinds(result.Events, 1)) != len(uniqueAuditKinds(auditKinds(result.Events, 1))) {
+		t.Fatalf("late event produced duplicate accounting audit: %v", auditKinds(result.Events, 1))
+	}
+}
+
+func TestHandoffReplayIsDeterministic(t *testing.T) {
+	run := func() Result {
+		cfg := handoffConfig()
+		cfg.Failures = []Failure{{At: 1500 * time.Millisecond, JobID: 1}}
+		cfg.Confirmations = []OutcomeConfirmation{{At: 2500 * time.Millisecond, JobID: 1}}
+		jobs := []Job{
+			{Arrival: time.Second, Service: time.Second, Class: "gpu", Cost: 2},
+			{Arrival: 1010 * time.Millisecond, Service: 100 * time.Millisecond, Class: "gpu"},
+		}
+		result, err := New(cfg, decision.NewQueueRateStrategy()).Run(jobs)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return result
+	}
+
+	first, second := run(), run()
+	if !reflect.DeepEqual(first.Events, second.Events) {
+		t.Fatalf("audit events differ across replays\nfirst=%v\nsecond=%v", first.Events, second.Events)
+	}
+	if !reflect.DeepEqual(first.PerClass, second.PerClass) {
+		t.Fatalf("counters differ across replays\nfirst=%v\nsecond=%v", first.PerClass, second.PerClass)
+	}
+}
+
+func uniqueAuditKinds(kinds []string) []string {
+	seen := map[string]bool{}
+	var unique []string
+	for _, kind := range kinds {
+		if !seen[kind] {
+			seen[kind] = true
+			unique = append(unique, kind)
+		}
+	}
+	return unique
 }
 
 func TestCompatibilityDoesNotRelaxNormalAdmission(t *testing.T) {

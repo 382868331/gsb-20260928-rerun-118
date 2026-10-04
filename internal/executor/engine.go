@@ -55,19 +55,21 @@ const (
 	stateBusy
 	stateDraining
 	stateReserved
+	stateStandby
 	stateLost
 )
 
 type worker struct {
-	id      int
-	gen     int
-	class   string
-	state   workerState
-	readyAt time.Duration
-	jobID   int
-	job     Job
-	started time.Duration
-	handoff bool
+	id         int
+	gen        int
+	class      string
+	state      workerState
+	readyAt    time.Duration
+	jobID      int
+	job        Job
+	started    time.Duration
+	handoff    bool
+	authorized bool
 }
 
 type queuedJob struct {
@@ -179,13 +181,14 @@ type Engine struct {
 	cfg      Config
 	strategy decision.Strategy
 
-	classes map[string]*classRuntime
-	order   []string
-	workers []*worker
-	logs    []decision.Log
-	audits  []AuditEvent
-	unknown []*unknownJob
-	nextJob int
+	classes    map[string]*classRuntime
+	order      []string
+	workers    []*worker
+	logs       []decision.Log
+	audits     []AuditEvent
+	unknown    []*unknownJob
+	nextJob    int
+	nextWorker int
 
 	events eventHeap
 	seq    int
@@ -388,19 +391,29 @@ func (e *Engine) dispatch(now time.Duration, class string) {
 
 func (e *Engine) handleReady(now time.Duration, id, gen int) {
 	w := e.workerByID(id, gen)
-	if w == nil || w.state != stateStarting && w.state != stateReserved {
+	if w == nil {
 		return
 	}
-	if w.jobID > 0 {
-		w.state = stateBusy
-		w.started = now
-		e.schedule(event{at: now + w.job.Service, kind: evComplete, ref: w.id, gen: w.gen, jobID: w.jobID, job: w.job})
-		e.audit(now, AuditTakeover, w.jobID, w.job, w, "人工确认旧效果不存在；替代实例就绪后执行剩余任务")
+	switch w.state {
+	case stateStarting:
+		w.state = stateIdle
+		w.readyAt = now
+		e.dispatch(now, w.class)
+	case stateReserved:
+		if w.authorized {
+			w.state = stateBusy
+			w.started = now
+			e.schedule(event{at: now + w.job.Service, kind: evComplete, ref: w.id, gen: w.gen, jobID: w.jobID, job: w.job})
+			e.audit(now, AuditTakeover, w.jobID, w.job, w, "人工已确认旧效果不存在；替代实例就绪后执行剩余任务")
+			return
+		}
+		w.state = stateStandby
+		w.readyAt = now
+		e.audit(now, AuditReserveStandby, w.jobID, w.job, w, "替代实例已就绪但旧效果尚未确认；继续待命，不自动重投")
+	case stateStandby:
+	default:
 		return
 	}
-	w.state = stateIdle
-	w.readyAt = now
-	e.dispatch(now, w.class)
 }
 
 func (e *Engine) handleComplete(now time.Duration, id, gen int) {
@@ -425,6 +438,7 @@ func (e *Engine) handleComplete(now time.Duration, id, gen int) {
 	e.audit(now, AuditComplete, w.jobID, w.job, w, completionReason)
 	w.jobID = 0
 	w.started = 0
+	w.authorized = false
 	if w.state == stateDraining {
 		e.audit(now, AuditRelease, completedID, completedJob, w, "忙碌实例完成缩容前手头工作并退出")
 		e.removeWorker(w)
@@ -493,7 +507,9 @@ func (e *Engine) handleLoseWorker(now time.Duration, jobID int) {
 	replacement.job = job
 	replacement.started = now
 	replacement.handoff = true
+	replacement.authorized = false
 	if replacement.readyAt <= now {
+		replacement.state = stateStandby
 		e.audit(now, AuditReserveStandby, jobID, job, replacement, "替代实例就绪但不自动认定旧实例停止；等待人工确认旧效果")
 	} else {
 		e.audit(now, AuditReserveStandby, jobID, job, replacement, "替代实例仍在途启动；等待启动和人工确认，不把在途容量计入未来扩容")
@@ -506,16 +522,16 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 		return
 	}
 	c := e.classes[item.oldClass]
-	c.counters.Unknown--
 	replacement := item.replacement
 	if observed {
-		c.counters.Completed++
+		c.counters.ResolveUnknownAsCompleted()
 		if replacement != nil {
 			replacement.handoff = false
+			replacement.authorized = false
 			replacement.jobID = 0
 			replacement.job = Job{}
 			replacement.started = 0
-			if replacement.state == stateReserved && replacement.readyAt <= now {
+			if replacement.state == stateStandby {
 				replacement.state = stateIdle
 			} else if replacement.state == stateReserved {
 				replacement.state = stateStarting
@@ -524,10 +540,18 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 		}
 		e.audit(now, AuditConfirmEffect, jobID, item.job, nil, "操作者确认旧效果已产生；只保留结果，不重复执行")
 	} else {
+		c.counters.Unknown--
 		e.audit(now, AuditConfirmEffect, jobID, item.job, nil, "操作者确认旧效果不存在；允许接替执行剩余任务")
 		if replacement == nil {
 			replacement = e.chooseReplacement(now, item.job, item.oldClass)
 			item.replacement = replacement
+			if replacement != nil {
+				replacement.state = stateReserved
+				replacement.jobID = jobID
+				replacement.job = item.job
+				replacement.started = now
+				replacement.handoff = true
+			}
 		}
 		if replacement == nil {
 			c.counters.Rejected++
@@ -537,13 +561,14 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 			replacement.job = item.job
 			replacement.jobID = jobID
 			replacement.started = now
-			if replacement.state == stateReserved && replacement.readyAt <= now {
+			replacement.authorized = true
+			if replacement.state == stateStandby {
 				replacement.state = stateBusy
 				e.schedule(event{at: now + item.remaining, kind: evComplete, ref: replacement.id, gen: replacement.gen, jobID: jobID, job: item.job})
 				e.audit(now, AuditTakeover, jobID, item.job, replacement, "替代实例已就绪，执行剩余任务")
 			} else {
 				replacement.state = stateReserved
-				e.audit(now, AuditReserveStandby, jobID, item.job, replacement, "替代实例仍在途；就绪后执行剩余任务")
+				e.audit(now, AuditReserveStandby, jobID, item.job, replacement, "已确认允许接替；替代实例仍在途，就绪后执行剩余任务")
 			}
 		}
 	}
@@ -758,16 +783,8 @@ func (e *Engine) activeClassWorkerCount(class string) int {
 }
 
 func (e *Engine) nextWorkerID(class string) (int, int) {
-	maxID := 0
-	byID := map[int]int{}
-	for _, w := range e.workers {
-		if w.id > maxID {
-			maxID = w.id
-		}
-		byID[w.id] = w.gen
-	}
-	id := maxID + 1
-	return id, byID[id] + 1
+	e.nextWorker++
+	return e.nextWorker, 1
 }
 
 func (e *Engine) workerByJob(jobID int) *worker {

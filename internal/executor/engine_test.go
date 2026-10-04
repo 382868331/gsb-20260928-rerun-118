@@ -252,3 +252,111 @@ func TestUnknownClassRejected(t *testing.T) {
 		t.Fatal("want error for job class without worker class")
 	}
 }
+
+// 替代实例在人工确认前就绪：只能进入待命，绝不能提前执行未知任务。
+// 确认旧效果已发生时，该任务只记一次完成，不出现 takeover/complete 双份账目。
+func TestStandbyReadyBeforeConfirmationDoesNotRun(t *testing.T) {
+	cfg := handoffConfig()
+	// cpu 替代实例 10ms 就绪，故障 1500ms 发生，确认 3s 才到：就绪远早于确认。
+	cfg.Failures = []Failure{{At: 1500 * time.Millisecond, JobID: 1}}
+	cfg.Confirmations = []OutcomeConfirmation{{At: 3000 * time.Millisecond, JobID: 1, EffectObserved: true}}
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: time.Second, Service: time.Second, Class: "gpu", Cost: 2},
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Submitted != 1 || gpu.Completed != 1 || gpu.Unknown != 0 || gpu.Rejected != 0 {
+		t.Fatalf("确认已生效后账目应只有一次完成: %+v", gpu)
+	}
+	if len(result.Unknown) != 0 {
+		t.Fatalf("未确认未知残留: %+v", result.Unknown)
+	}
+	kinds := auditKinds(result.Events, 1)
+	for _, kind := range kinds {
+		if kind == AuditTakeover {
+			t.Fatalf("未确认前替代实例不得执行任务，审计序列=%v", kinds)
+		}
+	}
+	var completes int
+	for _, kind := range kinds {
+		if kind == AuditComplete {
+			completes++
+		}
+	}
+	if completes != 0 {
+		t.Fatalf("确认已生效时不应由替代实例再完成一次，审计序列=%v", kinds)
+	}
+	if !containsAuditReason(result.Events, AuditConfirmEffect, "只保留结果，不重复执行") {
+		t.Fatalf("缺少已生效确认审计: %+v", result.Events)
+	}
+}
+
+// 确认旧效果不存在时，尚未完成启动的替代实例在就绪后执行剩余工作；
+// 旧实例的迟到完成事件不得重复记账或访问已释放状态。
+func TestConfirmedNotObservedRunsAfterReadyAndLateCompleteIgnored(t *testing.T) {
+	cfg := handoffConfig()
+	// gpu 替代实例 1s 启动延迟，故障 1500ms 时第二个 gpu 实例仍在启动中。
+	cfg.Failures = []Failure{{At: 1500 * time.Millisecond, JobID: 1}}
+	cfg.Confirmations = []OutcomeConfirmation{{At: 1600 * time.Millisecond, JobID: 1}}
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: time.Second, Service: time.Second, Class: "gpu", Cost: 2},
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Submitted != 1 || gpu.Completed != 1 || gpu.Unknown != 0 {
+		t.Fatalf("接替执行后应恰好一次完成: %+v", gpu)
+	}
+	kinds := auditKinds(result.Events, 1)
+	var completes, takeovers int
+	for _, kind := range kinds {
+		switch kind {
+		case AuditComplete:
+			completes++
+		case AuditTakeover:
+			takeovers++
+		}
+	}
+	if completes != 1 || takeovers != 1 {
+		t.Fatalf("接替审计应各出现一次，审计序列=%v", kinds)
+	}
+}
+
+// 重复/迟到的确认事件必须幂等：同一任务不会被二次记账。
+func TestDuplicateConfirmationIsIdempotent(t *testing.T) {
+	cfg := handoffConfig()
+	cfg.Failures = []Failure{{At: 1500 * time.Millisecond, JobID: 1}}
+	cfg.Confirmations = []OutcomeConfirmation{
+		{At: 1600 * time.Millisecond, JobID: 1, EffectObserved: true},
+		{At: 2500 * time.Millisecond, JobID: 1, EffectObserved: true},
+	}
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	jobs := []Job{{Arrival: time.Second, Service: time.Second, Class: "gpu", Cost: 2}}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Completed != 1 || gpu.Unknown != 0 {
+		t.Fatalf("重复确认后账目被二次修改: %+v", gpu)
+	}
+	var confirms int
+	for _, event := range result.Events {
+		if event.JobID == 1 && event.Kind == AuditConfirmEffect {
+			confirms++
+		}
+	}
+	if confirms != 1 {
+		t.Fatalf("确认审计=%d，只应处理一次", confirms)
+	}
+}

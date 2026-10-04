@@ -68,6 +68,12 @@ type worker struct {
 	job     Job
 	started time.Duration
 	handoff bool
+	// standby 表示该实例是为某个失联任务预声明的替代实例：
+	// 就绪后只保留待命，未收到人工确认前绝不开始执行未知任务。
+	standby      bool
+	standbyReady bool
+	// runOnReady 表示人工已确认旧效果不存在：替代实例一就绪就执行剩余任务。
+	runOnReady bool
 }
 
 type queuedJob struct {
@@ -388,29 +394,41 @@ func (e *Engine) dispatch(now time.Duration, class string) {
 
 func (e *Engine) handleReady(now time.Duration, id, gen int) {
 	w := e.workerByID(id, gen)
+	// 迟到的就绪事件：实例已被释放或状态已推进，忽略，不访问陈旧状态。
 	if w == nil || w.state != stateStarting && w.state != stateReserved {
 		return
 	}
-	if w.jobID > 0 {
+	w.readyAt = now
+	if w.state == stateReserved {
+		if !w.runOnReady {
+			// 替代实例就绪只是接替容量就绪：旧实例是否已停止、旧效果是否发生
+			// 都还没有人工确认，因此只记录就绪并继续待命，绝不重投未知任务。
+			w.standbyReady = true
+			e.audit(now, AuditReserveStandby, w.jobID, w.job, w, "替代实例启动完成进入待命；就绪不等于旧实例停止，继续等待人工确认")
+			return
+		}
+		// 人工已确认旧效果不存在：就绪后立即执行剩余工作。
 		w.state = stateBusy
-		w.started = now
+		w.standby = false
+		w.runOnReady = false
 		e.schedule(event{at: now + w.job.Service, kind: evComplete, ref: w.id, gen: w.gen, jobID: w.jobID, job: w.job})
 		e.audit(now, AuditTakeover, w.jobID, w.job, w, "人工确认旧效果不存在；替代实例就绪后执行剩余任务")
 		return
 	}
 	w.state = stateIdle
-	w.readyAt = now
 	e.dispatch(now, w.class)
 }
 
 func (e *Engine) handleComplete(now time.Duration, id, gen int) {
 	w := e.workerByID(id, gen)
+	// 迟到的完成事件：实例可能已在失联/确认时释放，或事件属于上一代实例，
+	// 一律忽略，避免重复记账或访问已释放状态。
 	if w == nil || w.state != stateBusy && w.state != stateDraining {
 		return
 	}
 	jobClass := w.job.Class
 	c := e.classes[jobClass]
-	wait := now - w.job.Arrival - w.job.Service
+	wait := w.started - w.job.Arrival
 	if wait < 0 {
 		wait = 0
 	}
@@ -455,7 +473,8 @@ func (e *Engine) handleTick(now time.Duration) {
 
 func (e *Engine) handleLoseWorker(now time.Duration, jobID int) {
 	w := e.workerByJob(jobID)
-	if w == nil || w.state != stateBusy && w.state != stateDraining {
+	// 只有真正在执行该任务的实例才算失联；待命替代实例或已处理的重复/迟到事件不算。
+	if w == nil || w.state != stateBusy && w.state != stateDraining || w.standby {
 		return
 	}
 	oldClass := w.class
@@ -491,27 +510,43 @@ func (e *Engine) handleLoseWorker(now time.Duration, jobID int) {
 	replacement.state = stateReserved
 	replacement.jobID = jobID
 	replacement.job = job
-	replacement.started = now
 	replacement.handoff = true
+	replacement.standby = true
+	replacement.standbyReady = replacement.readyAt <= now
 	if replacement.readyAt <= now {
 		e.audit(now, AuditReserveStandby, jobID, job, replacement, "替代实例就绪但不自动认定旧实例停止；等待人工确认旧效果")
 	} else {
-		e.audit(now, AuditReserveStandby, jobID, job, replacement, "替代实例仍在途启动；等待启动和人工确认，不把在途容量计入未来扩容")
+		e.audit(now, AuditReserveStandby, jobID, job, replacement, "替代实例仍在途启动；启动完成后只进入待命，仍需等待人工确认")
 	}
 }
 
 func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool) {
 	item := e.unknownByJob(jobID)
 	if item == nil {
+		// 重复或迟到的确认：同一未知任务只处理一次，不重复记账。
 		return
 	}
 	c := e.classes[item.oldClass]
-	c.counters.Unknown--
 	replacement := item.replacement
 	if observed {
-		c.counters.Completed++
+		// 人工确认旧效果已经产生：只把未知确认为完成结果，绝不执行剩余工作。
+		wait := item.startedAt - item.job.Arrival
+		if wait < 0 {
+			wait = 0
+		}
+		c.counters.ResolveUnknownAsCompleted()
+		if wait > 0 {
+			c.counters.Waited++
+			c.counters.TotalWait += wait
+			if wait > c.counters.MaxWait {
+				c.counters.MaxWait = wait
+			}
+		}
 		if replacement != nil {
 			replacement.handoff = false
+			replacement.standby = false
+			replacement.standbyReady = false
+			replacement.runOnReady = false
 			replacement.jobID = 0
 			replacement.job = Job{}
 			replacement.started = 0
@@ -530,20 +565,32 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 			item.replacement = replacement
 		}
 		if replacement == nil {
+			c.counters.Unknown--
 			c.counters.Rejected++
 			e.audit(now, AuditReject, jobID, item.job, nil, "确认需要接替但无预声明兼容容量")
 		} else {
-			item.job.Service = item.remaining
-			replacement.job = item.job
+			c.counters.Unknown--
+			c.inflight++
+			remaining := item.remaining
+			runJob := item.job
+			runJob.Service = remaining
 			replacement.jobID = jobID
+			replacement.job = runJob
 			replacement.started = now
-			if replacement.state == stateReserved && replacement.readyAt <= now {
+			replacement.standbyReady = false
+			ready := replacement.readyAt <= now
+			if ready {
 				replacement.state = stateBusy
-				e.schedule(event{at: now + item.remaining, kind: evComplete, ref: replacement.id, gen: replacement.gen, jobID: jobID, job: item.job})
-				e.audit(now, AuditTakeover, jobID, item.job, replacement, "替代实例已就绪，执行剩余任务")
+				replacement.standby = false
+				replacement.runOnReady = false
+				e.schedule(event{at: now + remaining, kind: evComplete, ref: replacement.id, gen: replacement.gen, jobID: jobID, job: runJob})
+				e.audit(now, AuditTakeover, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例已就绪，执行剩余任务")
 			} else {
+				// 替代实例仍在启动：继续待命，就绪后由 handleReady 接替执行。
 				replacement.state = stateReserved
-				e.audit(now, AuditReserveStandby, jobID, item.job, replacement, "替代实例仍在途；就绪后执行剩余任务")
+				replacement.standby = true
+				replacement.runOnReady = true
+				e.audit(now, AuditReserveStandby, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例仍在途，就绪后执行剩余任务")
 			}
 		}
 	}

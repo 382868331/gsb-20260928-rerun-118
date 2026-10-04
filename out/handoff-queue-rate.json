@@ -535,7 +535,7 @@
       "JobClass": "gpu",
       "WorkerID": 1,
       "WorkerClass": "cpu",
-      "Reason": "替代实例已就绪，执行剩余任务"
+      "Reason": "人工确认旧效果不存在；替代实例已就绪，执行剩余任务"
     },
     {
       "At": 4882000000,

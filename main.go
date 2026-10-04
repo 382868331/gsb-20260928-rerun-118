@@ -21,6 +21,8 @@ type replayRecord struct {
 	Seed     int64                       `json:"seed"`
 	Jobs     int                         `json:"jobs"`
 	Logs     []decision.Log              `json:"logs"`
+	Events   []executor.AuditEvent       `json:"events"`
+	Unknown  []executor.UnknownJob       `json:"unknown"`
 	PerClass map[string]metrics.Counters `json:"per_class"`
 	Total    metrics.Counters            `json:"total"`
 }
@@ -28,7 +30,7 @@ type replayRecord struct {
 func main() {
 	outDir := flag.String("out", "out", "决策依据输出目录")
 	seed := flag.Int64("seed", 42, "重放随机种子")
-	scenario := flag.String("scenario", "all", "重放场景：burst|long|cap|all")
+	scenario := flag.String("scenario", "all", "重放场景：burst|long|cap|handoff|all")
 	verbose := flag.Bool("v", false, "打印每条非 hold 决策")
 	flag.Parse()
 
@@ -39,11 +41,12 @@ func main() {
 	strategyOrder := []string{"queue-rate", "queue-only"}
 
 	scenarios := map[string]func(int64) []executor.Job{
-		"burst": burstTraffic,
-		"long":  longTraffic,
-		"cap":   capTraffic,
+		"burst":   burstTraffic,
+		"long":    longTraffic,
+		"cap":     capTraffic,
+		"handoff": handoffTraffic,
 	}
-	scenarioOrder := []string{"burst", "long", "cap"}
+	scenarioOrder := []string{"burst", "long", "cap", "handoff"}
 
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -57,7 +60,7 @@ func main() {
 		jobs := scenarios[scenarioName](*seed)
 		results := map[string]executor.Result{}
 		for _, strategyName := range strategyOrder {
-			engine := executor.New(classConfigs(), strategies[strategyName]())
+			engine := executor.New(handoffConfigs(scenarioName), strategies[strategyName]())
 			result, err := engine.Run(jobs)
 			if err != nil {
 				fmt.Printf("场景 %s 策略 %s 校验失败: %v\n", scenarioName, strategyName, err)
@@ -66,7 +69,8 @@ func main() {
 			results[strategyName] = result
 			record := replayRecord{
 				Scenario: scenarioName, Strategy: strategyName, Seed: *seed,
-				Jobs: len(jobs), Logs: result.Logs, PerClass: result.PerClass, Total: result.Total,
+				Jobs: len(jobs), Logs: result.Logs, Events: result.Events, Unknown: result.Unknown,
+				PerClass: result.PerClass, Total: result.Total,
 			}
 			path := filepath.Join(*outDir, scenarioName+"-"+strategyName+".json")
 			data, _ := json.MarshalIndent(record, "", "  ")
@@ -94,6 +98,21 @@ func classConfigs() executor.Config {
 		Tick:     time.Second,
 		Cooldown: 3 * time.Second,
 	}
+}
+
+func handoffConfigs(scenario string) executor.Config {
+	cfg := classConfigs()
+	if scenario != "handoff" {
+		return cfg
+	}
+	gpu := cfg.Classes["gpu"]
+	gpu.Max = 2
+	gpu.QueueCap = 2
+	cfg.Classes["gpu"] = gpu
+	cfg.Compatibility = map[string][]string{"gpu": {"gpu", "cpu"}}
+	cfg.Failures = []executor.Failure{{At: 4200 * time.Millisecond, JobID: 4}}
+	cfg.Confirmations = []executor.OutcomeConfirmation{{At: 4400 * time.Millisecond, JobID: 4}}
+	return cfg
 }
 
 type phaseSpec struct {
@@ -164,6 +183,24 @@ func capTraffic(seed int64) []executor.Job {
 	jobs = buildJobs(rng, jobs, []phaseSpec{
 		{0, 12 * time.Second, 2.0, "cpu", 400 * time.Millisecond, 120},
 		{time.Second, 10 * time.Second, 2.5, "gpu", 2500 * time.Millisecond, 80},
+	})
+	return jobs
+}
+
+// handoffTraffic 同时制造 gpu 类别容量耗尽、忙碌 gpu 失联和后续缩容检查。
+func handoffTraffic(seed int64) []executor.Job {
+	rng := rand.New(rand.NewSource(seed))
+	var jobs []executor.Job
+	for i := 0; i < 9; i++ {
+		jobs = append(jobs, executor.Job{
+			Arrival: 3500*time.Millisecond + time.Duration(i)*70*time.Millisecond,
+			Service: 1200*time.Millisecond + time.Duration(rng.Intn(300))*time.Millisecond,
+			Class:   "gpu",
+			Cost:    2 + i%3,
+		})
+	}
+	jobs = buildJobs(rng, jobs, []phaseSpec{
+		{0, 10 * time.Second, 0.8, "cpu", 300 * time.Millisecond, 120},
 	})
 	return jobs
 }

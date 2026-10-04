@@ -14,6 +14,7 @@ type Snapshot struct {
 	Starting    int
 	Busy        int
 	Draining    int
+	Unknown     int
 	QueueLength int
 	QueueCap    int
 
@@ -29,6 +30,7 @@ type Counters struct {
 	Submitted int
 	Completed int
 	Rejected  int
+	Unknown   int
 	Waited    int
 
 	TotalWait time.Duration
@@ -47,6 +49,16 @@ func (c *Counters) RecordArrival() {
 func (c *Counters) RecordRejection() {
 	c.Rejected++
 	c.windowRejections++
+}
+
+func (c *Counters) RecordUnknown() {
+	c.Unknown++
+}
+
+func (c *Counters) ResolveUnknownAsCompleted() {
+	c.Unknown--
+	c.Completed++
+	c.windowCompletions++
 }
 
 func (c *Counters) RecordCompletion(wait time.Duration) {
@@ -82,6 +94,7 @@ func (c *Counters) Add(other Counters) {
 	c.Submitted += other.Submitted
 	c.Completed += other.Completed
 	c.Rejected += other.Rejected
+	c.Unknown += other.Unknown
 	c.Waited += other.Waited
 	c.TotalWait += other.TotalWait
 	if other.MaxWait > c.MaxWait {

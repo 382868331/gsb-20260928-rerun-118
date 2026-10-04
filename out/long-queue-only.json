@@ -373,11 +373,771 @@
       "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
     }
   ],
+  "events": [
+    {
+      "At": 38000000,
+      "Kind": "enqueue",
+      "JobID": 1,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 814666666,
+      "Kind": "enqueue",
+      "JobID": 2,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 1267333332,
+      "Kind": "enqueue",
+      "JobID": 3,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 2000000000,
+      "Kind": "assign",
+      "JobID": 1,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 2000000000,
+      "Kind": "assign",
+      "JobID": 2,
+      "JobClass": "cpu",
+      "WorkerID": 2,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 2000000000,
+      "Kind": "enqueue",
+      "JobID": 4,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 2040999998,
+      "Kind": "enqueue",
+      "JobID": 5,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 2356000000,
+      "Kind": "complete",
+      "JobID": 1,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 2356000000,
+      "Kind": "assign",
+      "JobID": 3,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 2400000000,
+      "Kind": "enqueue",
+      "JobID": 6,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 2401000000,
+      "Kind": "complete",
+      "JobID": 2,
+      "JobClass": "cpu",
+      "WorkerID": 2,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 2401000000,
+      "Kind": "assign",
+      "JobID": 5,
+      "JobClass": "cpu",
+      "WorkerID": 2,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 2584666664,
+      "Kind": "enqueue",
+      "JobID": 7,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 2753000000,
+      "Kind": "complete",
+      "JobID": 3,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 2753000000,
+      "Kind": "assign",
+      "JobID": 7,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 2789000000,
+      "Kind": "complete",
+      "JobID": 5,
+      "JobClass": "cpu",
+      "WorkerID": 2,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 2800000000,
+      "Kind": "enqueue",
+      "JobID": 8,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 3000000000,
+      "Kind": "assign",
+      "JobID": 4,
+      "JobClass": "gpu",
+      "WorkerID": 3,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 3135000000,
+      "Kind": "complete",
+      "JobID": 7,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 3200000000,
+      "Kind": "enqueue",
+      "JobID": 9,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 3263333330,
+      "Kind": "enqueue",
+      "JobID": 10,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 3263333330,
+      "Kind": "assign",
+      "JobID": 10,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 3600000000,
+      "Kind": "enqueue",
+      "JobID": 11,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 3666333330,
+      "Kind": "complete",
+      "JobID": 10,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 4000000000,
+      "Kind": "enqueue",
+      "JobID": 12,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 4034999996,
+      "Kind": "enqueue",
+      "JobID": 13,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 4034999996,
+      "Kind": "assign",
+      "JobID": 13,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 4443999996,
+      "Kind": "complete",
+      "JobID": 13,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 4626666662,
+      "Kind": "enqueue",
+      "JobID": 14,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 4626666662,
+      "Kind": "assign",
+      "JobID": 14,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 5008666662,
+      "Kind": "complete",
+      "JobID": 14,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 5258333328,
+      "Kind": "enqueue",
+      "JobID": 15,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 5258333328,
+      "Kind": "assign",
+      "JobID": 15,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 5662333328,
+      "Kind": "complete",
+      "JobID": 15,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 6000000000,
+      "Kind": "assign",
+      "JobID": 6,
+      "JobClass": "gpu",
+      "WorkerID": 4,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 6000000000,
+      "Kind": "assign",
+      "JobID": 8,
+      "JobClass": "gpu",
+      "WorkerID": 5,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 6091999994,
+      "Kind": "enqueue",
+      "JobID": 16,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 6091999994,
+      "Kind": "assign",
+      "JobID": 16,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 6459999994,
+      "Kind": "complete",
+      "JobID": 16,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 6649666660,
+      "Kind": "enqueue",
+      "JobID": 17,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 6649666660,
+      "Kind": "assign",
+      "JobID": 17,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 7042666660,
+      "Kind": "complete",
+      "JobID": 17,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 7255333326,
+      "Kind": "enqueue",
+      "JobID": 18,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 7255333326,
+      "Kind": "assign",
+      "JobID": 18,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 7682333326,
+      "Kind": "complete",
+      "JobID": 18,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 8108999992,
+      "Kind": "enqueue",
+      "JobID": 19,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 8108999992,
+      "Kind": "assign",
+      "JobID": 19,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 8461999992,
+      "Kind": "complete",
+      "JobID": 19,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 8659666658,
+      "Kind": "enqueue",
+      "JobID": 20,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 8659666658,
+      "Kind": "assign",
+      "JobID": 20,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 9046666658,
+      "Kind": "complete",
+      "JobID": 20,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 9305000000,
+      "Kind": "complete",
+      "JobID": 4,
+      "JobClass": "gpu",
+      "WorkerID": 3,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 9305000000,
+      "Kind": "assign",
+      "JobID": 9,
+      "JobClass": "gpu",
+      "WorkerID": 3,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 9352333324,
+      "Kind": "enqueue",
+      "JobID": 21,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 9352333324,
+      "Kind": "assign",
+      "JobID": 21,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 9761333324,
+      "Kind": "complete",
+      "JobID": 21,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 9954999990,
+      "Kind": "enqueue",
+      "JobID": 22,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 9954999990,
+      "Kind": "assign",
+      "JobID": 22,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 10374999990,
+      "Kind": "complete",
+      "JobID": 22,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 10638666656,
+      "Kind": "enqueue",
+      "JobID": 23,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 10638666656,
+      "Kind": "assign",
+      "JobID": 23,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 10996666656,
+      "Kind": "complete",
+      "JobID": 23,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 11299333322,
+      "Kind": "enqueue",
+      "JobID": 24,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 11299333322,
+      "Kind": "assign",
+      "JobID": 24,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 11676333322,
+      "Kind": "complete",
+      "JobID": 24,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 11930999988,
+      "Kind": "enqueue",
+      "JobID": 25,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 11930999988,
+      "Kind": "assign",
+      "JobID": 25,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 12356999988,
+      "Kind": "complete",
+      "JobID": 25,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 12574666654,
+      "Kind": "enqueue",
+      "JobID": 26,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 12574666654,
+      "Kind": "assign",
+      "JobID": 26,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 12949666654,
+      "Kind": "complete",
+      "JobID": 26,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 12987000000,
+      "Kind": "complete",
+      "JobID": 6,
+      "JobClass": "gpu",
+      "WorkerID": 4,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 12987000000,
+      "Kind": "assign",
+      "JobID": 11,
+      "JobClass": "gpu",
+      "WorkerID": 4,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 13352333320,
+      "Kind": "enqueue",
+      "JobID": 27,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 13352333320,
+      "Kind": "assign",
+      "JobID": 27,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 13668000000,
+      "Kind": "complete",
+      "JobID": 8,
+      "JobClass": "gpu",
+      "WorkerID": 5,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 13668000000,
+      "Kind": "assign",
+      "JobID": 12,
+      "JobClass": "gpu",
+      "WorkerID": 5,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 13757333320,
+      "Kind": "complete",
+      "JobID": 27,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 14080999986,
+      "Kind": "enqueue",
+      "JobID": 28,
+      "JobClass": "cpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务尚未开始，保留在同类有界队列，可重新安排"
+    },
+    {
+      "At": 14080999986,
+      "Kind": "assign",
+      "JobID": 28,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 14471999986,
+      "Kind": "complete",
+      "JobID": 28,
+      "JobClass": "cpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 16055000000,
+      "Kind": "complete",
+      "JobID": 9,
+      "JobClass": "gpu",
+      "WorkerID": 3,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 20410000000,
+      "Kind": "complete",
+      "JobID": 11,
+      "JobClass": "gpu",
+      "WorkerID": 4,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 21013000000,
+      "Kind": "complete",
+      "JobID": 12,
+      "JobClass": "gpu",
+      "WorkerID": 5,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    }
+  ],
+  "unknown": null,
   "per_class": {
     "cpu": {
       "Submitted": 22,
       "Completed": 22,
       "Rejected": 0,
+      "Unknown": 0,
       "Waited": 5,
       "TotalWait": 4764333340,
       "MaxWait": 1962000000
@@ -386,6 +1146,7 @@
       "Submitted": 6,
       "Completed": 6,
       "Rejected": 0,
+      "Unknown": 0,
       "Waited": 6,
       "TotalWait": 32960000000,
       "MaxWait": 9668000000
@@ -395,6 +1156,7 @@
     "Submitted": 28,
     "Completed": 28,
     "Rejected": 0,
+    "Unknown": 0,
     "Waited": 11,
     "TotalWait": 37724333340,
     "MaxWait": 9668000000

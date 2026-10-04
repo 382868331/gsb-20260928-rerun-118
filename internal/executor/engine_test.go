@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -15,6 +16,115 @@ func testConfig() Config {
 		},
 		Tick:     time.Second,
 		Cooldown: 3 * time.Second,
+	}
+}
+
+func handoffConfig() Config {
+	return Config{
+		Classes: map[string]ClassConfig{
+			"gpu": {Min: 1, Max: 2, QueueCap: 2, StartupDelay: time.Second},
+			"cpu": {Min: 1, Max: 2, QueueCap: 2, StartupDelay: 10 * time.Millisecond, CostFactor: 3},
+		},
+		Compatibility: map[string][]string{
+			"gpu": {"gpu", "cpu"},
+		},
+		Tick:     500 * time.Millisecond,
+		Cooldown: time.Second,
+	}
+}
+
+func auditKinds(events []AuditEvent, jobID int) []string {
+	var kinds []string
+	for _, event := range events {
+		if event.JobID == jobID {
+			kinds = append(kinds, event.Kind)
+		}
+	}
+	return kinds
+}
+
+func containsAuditReason(events []AuditEvent, kind, fragment string) bool {
+	for _, event := range events {
+		if event.Kind == kind && strings.Contains(event.Reason, fragment) {
+			return true
+		}
+	}
+	return false
+}
+
+func TestFailedWorkerHandoffWaitsForManualOutcome(t *testing.T) {
+	cfg := handoffConfig()
+	cfg.Failures = []Failure{{At: 1500 * time.Millisecond, JobID: 1}}
+	cfg.Confirmations = []OutcomeConfirmation{{At: 1600 * time.Millisecond, JobID: 1}}
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: time.Second, Service: time.Second, Class: "gpu", Cost: 2},
+		{Arrival: 1010 * time.Millisecond, Service: 100 * time.Millisecond, Class: "gpu"},
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Submitted != 2 || gpu.Completed != 2 || gpu.Rejected != 0 || gpu.Unknown != 0 {
+		t.Fatalf("unexpected gpu counters after handoff: %+v", gpu)
+	}
+	if !containsAuditReason(result.Events, AuditReserveStandby, "就绪但不自动认定旧实例停止") {
+		t.Fatalf("missing standby reservation audit: %+v", result.Events)
+	}
+	if !containsAuditReason(result.Events, AuditConfirmEffect, "允许接替执行剩余任务") {
+		t.Fatalf("missing manual confirmation audit: %+v", result.Events)
+	}
+	kinds := auditKinds(result.Events, 1)
+	want := []string{AuditEnqueue, AuditAssign, AuditLoseWorker, AuditMarkUnknown, AuditReserveStandby, AuditConfirmEffect, AuditTakeover, AuditComplete, AuditRelease}
+	if strings.Join(kinds, ",") != strings.Join(want, ",") {
+		t.Fatalf("job 1 audit = %v, want %v", kinds, want)
+	}
+}
+
+func TestConfirmedEffectReleasesStandbyAndKeepsUnstartedQueued(t *testing.T) {
+	cfg := handoffConfig()
+	cfg.Failures = []Failure{{At: 1500 * time.Millisecond, JobID: 1}}
+	cfg.Confirmations = []OutcomeConfirmation{{At: 1600 * time.Millisecond, JobID: 1, EffectObserved: true}}
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: time.Second, Service: time.Second, Class: "gpu"},
+		{Arrival: 1010 * time.Millisecond, Service: 100 * time.Millisecond, Class: "gpu"},
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.PerClass["gpu"].Completed != 2 {
+		t.Fatalf("gpu counters = %+v, want unstarted job rescheduled after class replacement starts", result.PerClass["gpu"])
+	}
+	if len(result.Unknown) != 0 {
+		t.Fatalf("unknown jobs = %+v, want resolved", result.Unknown)
+	}
+	if !containsAuditReason(result.Events, AuditRelease, "取消接替执行") {
+		t.Fatalf("standby was not released after effect confirmation: %+v", result.Events)
+	}
+}
+
+func TestCompatibilityDoesNotRelaxNormalAdmission(t *testing.T) {
+	cfg := handoffConfig()
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	var jobs []Job
+	for i := 0; i < 5; i++ {
+		jobs = append(jobs, Job{Arrival: time.Duration(i) * time.Millisecond, Service: time.Second, Class: "gpu"})
+	}
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Rejected != 2 {
+		t.Fatalf("gpu rejected = %d, want 2 despite cpu compatibility: %+v", gpu.Rejected, gpu)
+	}
+	if !containsAuditReason(result.Events, AuditReject, "不放宽普通亲和性") {
+		t.Fatalf("missing affinity rejection reason: %+v", result.Events)
 	}
 }
 

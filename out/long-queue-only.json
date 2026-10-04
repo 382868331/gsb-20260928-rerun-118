@@ -90,7 +90,7 @@
       "Action": "hold",
       "From": 2,
       "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "Reason": "类别 cpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
     },
     {
       "At": 6000000000,
@@ -98,7 +98,7 @@
       "Action": "hold",
       "From": 3,
       "To": 3,
-      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
+      "Reason": "类别 gpu 队列 1/4 未达高水位 2，维持已就绪 3 人"
     },
     {
       "At": 7000000000,
@@ -106,106 +106,10 @@
       "Action": "hold",
       "From": 2,
       "To": 2,
-      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
+      "Reason": "类别 cpu 队列 2/8 未达高水位 4，维持已就绪 2 人"
     },
     {
       "At": 7000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 3,
-      "To": 3,
-      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
-    },
-    {
-      "At": 8000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 8000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 3,
-      "To": 3,
-      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
-    },
-    {
-      "At": 9000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 9000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 3,
-      "To": 3,
-      "Reason": "类别 gpu 队列 3/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
-    },
-    {
-      "At": 10000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 10000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 3,
-      "To": 3,
-      "Reason": "类别 gpu 队列 2/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
-    },
-    {
-      "At": 11000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 11000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 3,
-      "To": 3,
-      "Reason": "类别 gpu 队列 2/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
-    },
-    {
-      "At": 12000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 12000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 3,
-      "To": 3,
-      "Reason": "类别 gpu 队列 2/4 已达高水位，但已就绪 3 人触及上限 3，只能继续拒绝"
-    },
-    {
-      "At": 13000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 13000000000,
       "Class": "gpu",
       "Action": "hold",
       "From": 3,
@@ -213,15 +117,47 @@
       "Reason": "类别 gpu 队列 1/4 未达高水位 2，维持已就绪 3 人"
     },
     {
-      "At": 14000000000,
+      "At": 8000000000,
       "Class": "cpu",
       "Action": "hold",
       "From": 2,
       "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "Reason": "类别 cpu 队列 3/8 未达高水位 4，维持已就绪 2 人"
     },
     {
-      "At": 14000000000,
+      "At": 8000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 1/4 未达高水位 2，维持已就绪 3 人"
+    },
+    {
+      "At": 9000000000,
+      "Class": "cpu",
+      "Action": "scale_up",
+      "From": 2,
+      "To": 4,
+      "Reason": "类别 cpu 队列 5/8 达到高水位 4，按已就绪 2 人扩容到 4（不看速率、不计在途扩容 0 人）"
+    },
+    {
+      "At": 9000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 3,
+      "To": 3,
+      "Reason": "类别 gpu 队列 1/4 未达高水位 2，维持已就绪 3 人"
+    },
+    {
+      "At": 10000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 4,
+      "To": 4,
+      "Reason": "类别 cpu 距上次容量调整 1s 不足冷却期 3s：本轮保持 4，防止刚扩又缩"
+    },
+    {
+      "At": 10000000000,
       "Class": "gpu",
       "Action": "hold",
       "From": 3,
@@ -229,15 +165,15 @@
       "Reason": "类别 gpu 队列空但 3 人仍忙碌，已就绪 3 人无需调整"
     },
     {
-      "At": 15000000000,
+      "At": 11000000000,
       "Class": "cpu",
       "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "From": 4,
+      "To": 4,
+      "Reason": "类别 cpu 距上次容量调整 2s 不足冷却期 3s：本轮保持 4，防止刚扩又缩"
     },
     {
-      "At": 15000000000,
+      "At": 11000000000,
       "Class": "gpu",
       "Action": "hold",
       "From": 3,
@@ -245,15 +181,15 @@
       "Reason": "类别 gpu 队列空但 3 人仍忙碌，已就绪 3 人无需调整"
     },
     {
-      "At": 16000000000,
+      "At": 12000000000,
       "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "Action": "scale_up",
+      "From": 4,
+      "To": 6,
+      "Reason": "类别 cpu 队列 4/8 达到高水位 4，按已就绪 4 人扩容到 6（不看速率、不计在途扩容 0 人）"
     },
     {
-      "At": 16000000000,
+      "At": 12000000000,
       "Class": "gpu",
       "Action": "hold",
       "From": 3,
@@ -261,15 +197,15 @@
       "Reason": "类别 gpu 队列空但 3 人仍忙碌，已就绪 3 人无需调整"
     },
     {
-      "At": 17000000000,
+      "At": 13000000000,
       "Class": "cpu",
       "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "From": 6,
+      "To": 6,
+      "Reason": "类别 cpu 距上次容量调整 1s 不足冷却期 3s：本轮保持 6，防止刚扩又缩"
     },
     {
-      "At": 17000000000,
+      "At": 13000000000,
       "Class": "gpu",
       "Action": "scale_down",
       "From": 3,
@@ -277,39 +213,39 @@
       "Reason": "类别 gpu 队列已空，只保留忙碌 2 人与下限 1，缩到 2（不看速率趋势）"
     },
     {
-      "At": 18000000000,
+      "At": 14000000000,
       "Class": "cpu",
       "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "From": 6,
+      "To": 6,
+      "Reason": "类别 cpu 距上次容量调整 2s 不足冷却期 3s：本轮保持 6，防止刚扩又缩"
     },
     {
-      "At": 18000000000,
+      "At": 14000000000,
       "Class": "gpu",
       "Action": "hold",
       "From": 2,
       "To": 2,
-      "Reason": "类别 gpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
+      "Reason": "类别 gpu 距上次容量调整 1s 不足冷却期 3s：本轮保持 2，防止刚扩又缩"
     },
     {
-      "At": 19000000000,
+      "At": 15000000000,
       "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
+      "Action": "scale_down",
+      "From": 6,
       "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+      "Reason": "类别 cpu 队列已空，只保留忙碌 0 人与下限 2，缩到 2（不看速率趋势）"
     },
     {
-      "At": 19000000000,
+      "At": 15000000000,
       "Class": "gpu",
       "Action": "hold",
       "From": 2,
       "To": 2,
-      "Reason": "类别 gpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
+      "Reason": "类别 gpu 距上次容量调整 2s 不足冷却期 3s：本轮保持 2，防止刚扩又缩"
     },
     {
-      "At": 20000000000,
+      "At": 16000000000,
       "Class": "cpu",
       "Action": "hold",
       "From": 2,
@@ -317,28 +253,92 @@
       "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
     },
     {
-      "At": 20000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 gpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 21000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 2,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
-    },
-    {
-      "At": 21000000000,
+      "At": 16000000000,
       "Class": "gpu",
       "Action": "scale_down",
       "From": 2,
       "To": 1,
       "Reason": "类别 gpu 队列已空，只保留忙碌 1 人与下限 1，缩到 1（不看速率趋势）"
+    },
+    {
+      "At": 17000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 17000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 18000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 18000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 19000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 19000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 20000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 20000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 21000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 2,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 2 人无需调整"
+    },
+    {
+      "At": 21000000000,
+      "Class": "gpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 1,
+      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
     },
     {
       "At": 22000000000,
@@ -373,30 +373,483 @@
       "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
     }
   ],
+  "task_logs": [
+    {
+      "At": 2000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 7,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 7（成本 356ms）"
+    },
+    {
+      "At": 2000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 8,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 8（成本 401ms）"
+    },
+    {
+      "At": 2356000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 7,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.962s）"
+    },
+    {
+      "At": 2356000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 9,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 9（成本 397ms）"
+    },
+    {
+      "At": 2401000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 8,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.185333334s）"
+    },
+    {
+      "At": 2401000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 10,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 10（成本 388ms）"
+    },
+    {
+      "At": 2753000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 9,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.088666668s）"
+    },
+    {
+      "At": 2753000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 11,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 11（成本 382ms）"
+    },
+    {
+      "At": 2789000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 10,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 360.000002ms）"
+    },
+    {
+      "At": 3000000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 1,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 1（成本 6.305s）"
+    },
+    {
+      "At": 3135000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 11,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 168.333336ms）"
+    },
+    {
+      "At": 3263333330,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 12,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 12（成本 403ms）"
+    },
+    {
+      "At": 3666333330,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 12,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 4034999996,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 13,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 13（成本 409ms）"
+    },
+    {
+      "At": 4443999996,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 13,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 4626666662,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 14,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 14（成本 382ms）"
+    },
+    {
+      "At": 5008666662,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 14,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 5258333328,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 15,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 15（成本 404ms）"
+    },
+    {
+      "At": 5662333328,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 15,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 6000000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 2,
+      "Worker": 4,
+      "Detail": "同类空闲实例就绪，安排任务 2（成本 6.987s）"
+    },
+    {
+      "At": 6000000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 3,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 3（成本 7.668s）"
+    },
+    {
+      "At": 6000000000,
+      "Action": "substitute",
+      "Class": "gpu",
+      "Job": 4,
+      "Worker": 1,
+      "Detail": "类别 gpu 容量已达上限 3 且无在途启动，按预先声明的兼容范围交给类别 cpu 空闲实例（任务成本 6.75s）"
+    },
+    {
+      "At": 6000000000,
+      "Action": "substitute",
+      "Class": "gpu",
+      "Job": 5,
+      "Worker": 2,
+      "Detail": "类别 gpu 容量已达上限 3 且无在途启动，按预先声明的兼容范围交给类别 cpu 空闲实例（任务成本 7.423s）"
+    },
+    {
+      "At": 9305000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 1,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 1s）"
+    },
+    {
+      "At": 9305000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 6,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 6（成本 7.345s）"
+    },
+    {
+      "At": 11000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 16,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 16（成本 368ms）"
+    },
+    {
+      "At": 11000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 17,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 17（成本 393ms）"
+    },
+    {
+      "At": 11368000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 16,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 4.908000006s）"
+    },
+    {
+      "At": 11368000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 18,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 18（成本 427ms）"
+    },
+    {
+      "At": 11393000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 17,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 4.35033334s）"
+    },
+    {
+      "At": 11393000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 19,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 19（成本 353ms）"
+    },
+    {
+      "At": 11746000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 19,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 3.284000008s）"
+    },
+    {
+      "At": 11746000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 20,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 20（成本 387ms）"
+    },
+    {
+      "At": 11795000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 18,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 4.112666674s）"
+    },
+    {
+      "At": 11795000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 21,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 21（成本 409ms）"
+    },
+    {
+      "At": 12133000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 20,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 3.086333342s）"
+    },
+    {
+      "At": 12133000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 22,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 22（成本 420ms）"
+    },
+    {
+      "At": 12204000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 21,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 2.442666676s）"
+    },
+    {
+      "At": 12204000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 23,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 23（成本 358ms）"
+    },
+    {
+      "At": 12553000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 22,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 2.17800001s）"
+    },
+    {
+      "At": 12553000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 24,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 24（成本 377ms）"
+    },
+    {
+      "At": 12562000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 23,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 1.565333344s）"
+    },
+    {
+      "At": 12562000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 25,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 25（成本 426ms）"
+    },
+    {
+      "At": 12750000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 4,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 2.8s）"
+    },
+    {
+      "At": 12750000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 26,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 26（成本 375ms）"
+    },
+    {
+      "At": 12930000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 24,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 1.253666678s）"
+    },
+    {
+      "At": 12987000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 2,
+      "Worker": 4,
+      "Detail": "任务完成，释放实例（等待 3.6s）"
+    },
+    {
+      "At": 12988000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 25,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 631.000012ms）"
+    },
+    {
+      "At": 13125000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 26,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 175.333346ms）"
+    },
+    {
+      "At": 13352333320,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 27,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 27（成本 405ms）"
+    },
+    {
+      "At": 13423000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 5,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 2.4s）"
+    },
+    {
+      "At": 13668000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 3,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 3.2s）"
+    },
+    {
+      "At": 13757333320,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 27,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 14080999986,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 28,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 28（成本 391ms）"
+    },
+    {
+      "At": 14471999986,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 28,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 16650000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 6,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 5.305s）"
+    }
+  ],
   "per_class": {
     "cpu": {
       "Submitted": 22,
       "Completed": 22,
       "Rejected": 0,
-      "Waited": 5,
-      "TotalWait": 4764333340,
-      "MaxWait": 1962000000
+      "Waited": 16,
+      "Unknown": 0,
+      "TotalWait": 32751666776,
+      "MaxWait": 4908000006
     },
     "gpu": {
       "Submitted": 6,
       "Completed": 6,
       "Rejected": 0,
       "Waited": 6,
-      "TotalWait": 32960000000,
-      "MaxWait": 9668000000
+      "Unknown": 0,
+      "TotalWait": 18305000000,
+      "MaxWait": 5305000000
     }
   },
   "total": {
     "Submitted": 28,
     "Completed": 28,
     "Rejected": 0,
-    "Waited": 11,
-    "TotalWait": 37724333340,
-    "MaxWait": 9668000000
+    "Waited": 22,
+    "Unknown": 0,
+    "TotalWait": 51056666776,
+    "MaxWait": 5305000000
   }
 }

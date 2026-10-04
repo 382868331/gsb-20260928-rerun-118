@@ -21,8 +21,16 @@ type replayRecord struct {
 	Seed     int64                       `json:"seed"`
 	Jobs     int                         `json:"jobs"`
 	Logs     []decision.Log              `json:"logs"`
+	TaskLogs []executor.TaskLog          `json:"task_logs"`
 	PerClass map[string]metrics.Counters `json:"per_class"`
 	Total    metrics.Counters            `json:"total"`
+}
+
+// scenarioSpec 把流量与注入的失联/确认事件绑定为一个可重放场景。
+type scenarioSpec struct {
+	jobs     func(int64) []executor.Job
+	faults   []executor.Fault
+	confirms []executor.Confirmation
 }
 
 func main() {
@@ -38,12 +46,13 @@ func main() {
 	}
 	strategyOrder := []string{"queue-rate", "queue-only"}
 
-	scenarios := map[string]func(int64) []executor.Job{
-		"burst": burstTraffic,
-		"long":  longTraffic,
-		"cap":   capTraffic,
+	scenarios := map[string]scenarioSpec{
+		"burst":    {jobs: burstTraffic},
+		"long":     {jobs: longTraffic},
+		"cap":      {jobs: capTraffic},
+		"failover": {jobs: failoverTraffic, faults: failoverFaults(), confirms: failoverConfirms()},
 	}
-	scenarioOrder := []string{"burst", "long", "cap"}
+	scenarioOrder := []string{"burst", "long", "cap", "failover"}
 
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -54,11 +63,12 @@ func main() {
 		if *scenario != "all" && *scenario != scenarioName {
 			continue
 		}
-		jobs := scenarios[scenarioName](*seed)
+		spec := scenarios[scenarioName]
+		jobs := spec.jobs(*seed)
 		results := map[string]executor.Result{}
 		for _, strategyName := range strategyOrder {
 			engine := executor.New(classConfigs(), strategies[strategyName]())
-			result, err := engine.Run(jobs)
+			result, err := engine.RunWithEvents(jobs, spec.faults, spec.confirms)
 			if err != nil {
 				fmt.Printf("场景 %s 策略 %s 校验失败: %v\n", scenarioName, strategyName, err)
 				continue
@@ -66,7 +76,8 @@ func main() {
 			results[strategyName] = result
 			record := replayRecord{
 				Scenario: scenarioName, Strategy: strategyName, Seed: *seed,
-				Jobs: len(jobs), Logs: result.Logs, PerClass: result.PerClass, Total: result.Total,
+				Jobs: len(jobs), Logs: result.Logs, TaskLogs: result.TaskLogs,
+				PerClass: result.PerClass, Total: result.Total,
 			}
 			path := filepath.Join(*outDir, scenarioName+"-"+strategyName+".json")
 			data, _ := json.MarshalIndent(record, "", "  ")
@@ -85,11 +96,13 @@ func main() {
 }
 
 // classConfigs 两类工作者：cpu 通用、gpu 专用（启动更慢、上限更低）。
+// gpu 预先声明 cpu 为兼容替代范围；cpu 未声明任何替代，
+// 因此 cpu 任务永远不会被交给 gpu 实例。
 func classConfigs() executor.Config {
 	return executor.Config{
 		Classes: map[string]executor.ClassConfig{
 			"cpu": {Min: 2, Max: 8, QueueCap: 8, StartupDelay: 2 * time.Second},
-			"gpu": {Min: 1, Max: 3, QueueCap: 4, StartupDelay: 3 * time.Second},
+			"gpu": {Min: 1, Max: 3, QueueCap: 4, StartupDelay: 3 * time.Second, Substitutes: []string{"cpu"}},
 		},
 		Tick:     time.Second,
 		Cooldown: 3 * time.Second,
@@ -168,6 +181,32 @@ func capTraffic(seed int64) []executor.Job {
 	return jobs
 }
 
+// failoverTraffic 人工流量：gpu 到达持续超过类别上限（容量耗尽、明确拒绝），
+// cpu 在 6 秒后流量停止触发低流量缩容，与工作者失联同时发生。
+func failoverTraffic(seed int64) []executor.Job {
+	rng := rand.New(rand.NewSource(seed))
+	var jobs []executor.Job
+	jobs = buildJobs(rng, jobs, []phaseSpec{
+		{0, 6 * time.Second, 6.0, "cpu", 400 * time.Millisecond, 120},
+		{time.Second, 10 * time.Second, 2.5, "gpu", 2500 * time.Millisecond, 80},
+	})
+	return jobs
+}
+
+// failoverFaults 在 gpu 容量耗尽期间让一名忙碌 gpu 工作者失联。
+func failoverFaults() []executor.Fault {
+	return []executor.Fault{
+		{At: 5 * time.Second, Class: "gpu", Busy: true},
+	}
+}
+
+// failoverConfirms 操作者核实旧实例效应后确认，未知任务才继续。
+func failoverConfirms() []executor.Confirmation {
+	return []executor.Confirmation{
+		{At: 9500 * time.Millisecond, Class: "gpu"},
+	}
+}
+
 func printDecisions(scenario, strategy string, result executor.Result) {
 	fmt.Printf("== 场景 %s / 策略 %s ==\n", scenario, strategy)
 	for _, entry := range result.Logs {
@@ -177,6 +216,13 @@ func printDecisions(scenario, strategy string, result executor.Result) {
 		fmt.Printf("[%6s] %-4s %-10s %d -> %d: %s\n",
 			entry.At, entry.Class, entry.Action, entry.From, entry.To, entry.Reason)
 	}
+	for _, entry := range result.TaskLogs {
+		if entry.Action == "assign" || entry.Action == "complete" {
+			continue
+		}
+		fmt.Printf("[%6s] %-4s %-14s 任务%d 实例%d: %s\n",
+			entry.At, entry.Class, entry.Action, entry.Job, entry.Worker, entry.Detail)
+	}
 	fmt.Println()
 }
 
@@ -184,10 +230,10 @@ func printDecisions(scenario, strategy string, result executor.Result) {
 func compare(scenario string, jobs []executor.Job, order []string, results map[string]executor.Result) {
 	a, b := results[order[0]], results[order[1]]
 	fmt.Printf("== 场景 %s：%d 个请求，相同流量下策略对比 ==\n", scenario, len(jobs))
-	fmt.Printf("%-12s %8s %8s %8s %10s %10s\n", "策略", "完成", "拒绝", "等待", "平均等待", "最大等待")
+	fmt.Printf("%-12s %8s %8s %8s %8s %10s %10s\n", "策略", "完成", "拒绝", "未知", "等待", "平均等待", "最大等待")
 	for _, name := range order {
 		t := results[name].Total
-		fmt.Printf("%-12s %8d %8d %8d %10s %10s\n", name, t.Completed, t.Rejected, t.Waited, t.MeanWait(), t.MaxWait)
+		fmt.Printf("%-12s %8d %8d %8d %8d %10s %10s\n", name, t.Completed, t.Rejected, t.Unknown, t.Waited, t.MeanWait(), t.MaxWait)
 	}
 	for _, class := range []string{"cpu", "gpu"} {
 		ca, cb := a.PerClass[class], b.PerClass[class]

@@ -453,12 +453,1935 @@
       "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
     }
   ],
+  "task_logs": [
+    {
+      "At": 2000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 1,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 1（成本 471ms）"
+    },
+    {
+      "At": 2000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 2,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 2（成本 402ms）"
+    },
+    {
+      "At": 2402000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 2,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.503s）"
+    },
+    {
+      "At": 2402000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 3,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 3（成本 407ms）"
+    },
+    {
+      "At": 2471000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 1,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 2s）"
+    },
+    {
+      "At": 2471000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 4,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 4（成本 406ms）"
+    },
+    {
+      "At": 2809000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 3,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.513s）"
+    },
+    {
+      "At": 2809000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 5,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 5（成本 451ms）"
+    },
+    {
+      "At": 2877000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 4,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 854ms）"
+    },
+    {
+      "At": 2877000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 6,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 6（成本 447ms）"
+    },
+    {
+      "At": 3000000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 9,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 9（成本 603ms）"
+    },
+    {
+      "At": 3260000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 5,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 724ms）"
+    },
+    {
+      "At": 3260000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 7,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 7（成本 438ms）"
+    },
+    {
+      "At": 3324000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 6,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 435ms）"
+    },
+    {
+      "At": 3603000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 9,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 2.963s）"
+    },
+    {
+      "At": 3603000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 10,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 10（成本 609ms）"
+    },
+    {
+      "At": 3617000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 8,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 8（成本 432ms）"
+    },
+    {
+      "At": 3698000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 7,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 379ms）"
+    },
+    {
+      "At": 4021000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 11,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 11（成本 282ms）"
+    },
+    {
+      "At": 4049000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 8,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 4123909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 12,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 12（成本 304ms）"
+    },
+    {
+      "At": 4212000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 10,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 1.581s）"
+    },
+    {
+      "At": 4212000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 56,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 56（成本 439ms）"
+    },
+    {
+      "At": 4303000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 11,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 4303000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 13,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 13（成本 268ms）"
+    },
+    {
+      "At": 4427909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 12,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 4427909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 14,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 14（成本 293ms）"
+    },
+    {
+      "At": 4571000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 13,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 118.18182ms）"
+    },
+    {
+      "At": 4571000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 15,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 15（成本 327ms）"
+    },
+    {
+      "At": 4651000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 56,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 152ms）"
+    },
+    {
+      "At": 4651000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 57,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 57（成本 400ms）"
+    },
+    {
+      "At": 4720909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 14,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 181.18182ms）"
+    },
+    {
+      "At": 4720909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 16,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 16（成本 253ms）"
+    },
+    {
+      "At": 4898000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 15,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 234.36364ms）"
+    },
+    {
+      "At": 4898000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 17,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 17（成本 287ms）"
+    },
+    {
+      "At": 4973909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 16,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 234.36364ms）"
+    },
+    {
+      "At": 4973909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 18,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 18（成本 309ms）"
+    },
+    {
+      "At": 5051000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 57,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 268.666667ms）"
+    },
+    {
+      "At": 5051000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 58,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 58（成本 393ms）"
+    },
+    {
+      "At": 5185000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 17,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 343.54546ms）"
+    },
+    {
+      "At": 5185000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 19,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 19（成本 320ms）"
+    },
+    {
+      "At": 5282909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 18,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 360.54546ms）"
+    },
+    {
+      "At": 5282909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 20,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 20（成本 258ms）"
+    },
+    {
+      "At": 5444000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 58,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 434.333334ms）"
+    },
+    {
+      "At": 5444000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 59,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 59（成本 393ms）"
+    },
+    {
+      "At": 5505000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 19,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 470.72728ms）"
+    },
+    {
+      "At": 5505000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 21,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 21（成本 277ms）"
+    },
+    {
+      "At": 5540909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 20,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 495.72728ms）"
+    },
+    {
+      "At": 5540909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 22,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 22（成本 326ms）"
+    },
+    {
+      "At": 5782000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 21,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 612.9091ms）"
+    },
+    {
+      "At": 5782000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 23,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 23（成本 275ms）"
+    },
+    {
+      "At": 5837000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 59,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 459.000001ms）"
+    },
+    {
+      "At": 5837000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 60,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 60（成本 359ms）"
+    },
+    {
+      "At": 5866909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 22,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 539.9091ms）"
+    },
+    {
+      "At": 5866909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 24,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 24（成本 305ms）"
+    },
+    {
+      "At": 6057000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 23,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 669.09092ms）"
+    },
+    {
+      "At": 6057000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 25,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 25（成本 291ms）"
+    },
+    {
+      "At": 6171909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 24,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 722.09092ms）"
+    },
+    {
+      "At": 6171909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 26,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 26（成本 277ms）"
+    },
+    {
+      "At": 6196000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 60,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 458.666668ms）"
+    },
+    {
+      "At": 6196000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 61,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 61（成本 399ms）"
+    },
+    {
+      "At": 6348000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 25,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 791.27274ms）"
+    },
+    {
+      "At": 6348000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 27,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 27（成本 260ms）"
+    },
+    {
+      "At": 6448909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 26,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 814.27274ms）"
+    },
+    {
+      "At": 6448909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 28,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 28（成本 304ms）"
+    },
+    {
+      "At": 6595000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 61,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 527.333335ms）"
+    },
+    {
+      "At": 6595000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 62,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 62（成本 449ms）"
+    },
+    {
+      "At": 6608000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 27,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 925.45456ms）"
+    },
+    {
+      "At": 6608000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 29,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 29（成本 297ms）"
+    },
+    {
+      "At": 6752909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 28,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 881.45456ms）"
+    },
+    {
+      "At": 6752909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 30,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 30（成本 335ms）"
+    },
+    {
+      "At": 6905000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 29,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 984.63638ms）"
+    },
+    {
+      "At": 6905000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 31,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 31（成本 291ms）"
+    },
+    {
+      "At": 7044000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 62,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 623.000002ms）"
+    },
+    {
+      "At": 7044000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 63,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 63（成本 369ms）"
+    },
+    {
+      "At": 7087909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 30,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.02663638s）"
+    },
+    {
+      "At": 7087909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 32,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 32（成本 320ms）"
+    },
+    {
+      "At": 7196000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 31,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.0568182s）"
+    },
+    {
+      "At": 7196000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 34,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 34（成本 287ms）"
+    },
+    {
+      "At": 7407909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 32,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.1438182s）"
+    },
+    {
+      "At": 7407909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 35,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 35（成本 283ms）"
+    },
+    {
+      "At": 7413000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 63,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 670.666669ms）"
+    },
+    {
+      "At": 7413000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 64,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 64（成本 410ms）"
+    },
+    {
+      "At": 7483000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 34,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.12209093s）"
+    },
+    {
+      "At": 7483000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 36,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 36（成本 282ms）"
+    },
+    {
+      "At": 7690909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 35,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.22909093s）"
+    },
+    {
+      "At": 7690909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 37,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 37（成本 321ms）"
+    },
+    {
+      "At": 7765000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 36,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.17127275s）"
+    },
+    {
+      "At": 7765000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 38,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 38（成本 259ms）"
+    },
+    {
+      "At": 7823000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 64,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 715.333336ms）"
+    },
+    {
+      "At": 7823000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 65,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 65（成本 412ms）"
+    },
+    {
+      "At": 8000000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 66,
+      "Worker": 4,
+      "Detail": "同类空闲实例就绪，安排任务 66（成本 391ms）"
+    },
+    {
+      "At": 8000000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 67,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 67（成本 408ms）"
+    },
+    {
+      "At": 8000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 39,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 39（成本 257ms）"
+    },
+    {
+      "At": 8000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 40,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 40（成本 272ms）"
+    },
+    {
+      "At": 8000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 41,
+      "Worker": 8,
+      "Detail": "同类空闲实例就绪，安排任务 41（成本 330ms）"
+    },
+    {
+      "At": 8000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 42,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 42（成本 264ms）"
+    },
+    {
+      "At": 8011909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 37,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.31027275s）"
+    },
+    {
+      "At": 8011909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 43,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 43（成本 255ms）"
+    },
+    {
+      "At": 8024000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 38,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 1.31345457s）"
+    },
+    {
+      "At": 8024000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 44,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 44（成本 251ms）"
+    },
+    {
+      "At": 8235000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 65,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 793.000003ms）"
+    },
+    {
+      "At": 8235000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 68,
+      "Worker": 3,
+      "Detail": "同类空闲实例就绪，安排任务 68（成本 437ms）"
+    },
+    {
+      "At": 8257000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 39,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 1.44754548s）"
+    },
+    {
+      "At": 8257000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 45,
+      "Worker": 6,
+      "Detail": "同类空闲实例就绪，安排任务 45（成本 262ms）"
+    },
+    {
+      "At": 8264000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 42,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 1.14281821s）"
+    },
+    {
+      "At": 8264000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 47,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 47（成本 277ms）"
+    },
+    {
+      "At": 8266909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 43,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 1.13481821s）"
+    },
+    {
+      "At": 8266909090,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 49,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 49（成本 259ms）"
+    },
+    {
+      "At": 8272000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 40,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 1.35863639s）"
+    },
+    {
+      "At": 8272000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 50,
+      "Worker": 7,
+      "Detail": "同类空闲实例就绪，安排任务 50（成本 329ms）"
+    },
+    {
+      "At": 8275000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 44,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 987.00003ms）"
+    },
+    {
+      "At": 8275000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 52,
+      "Worker": 2,
+      "Detail": "同类空闲实例就绪，安排任务 52（成本 257ms）"
+    },
+    {
+      "At": 8330000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 41,
+      "Worker": 8,
+      "Detail": "任务完成，释放实例（等待 1.2437273s）"
+    },
+    {
+      "At": 8330000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 53,
+      "Worker": 8,
+      "Detail": "同类空闲实例就绪，安排任务 53（成本 340ms）"
+    },
+    {
+      "At": 8391000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 66,
+      "Worker": 4,
+      "Detail": "任务完成，释放实例（等待 650.66667ms）"
+    },
+    {
+      "At": 8391000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 71,
+      "Worker": 4,
+      "Detail": "同类空闲实例就绪，安排任务 71（成本 583ms）"
+    },
+    {
+      "At": 8408000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 67,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 296.333337ms）"
+    },
+    {
+      "At": 8519000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 45,
+      "Worker": 6,
+      "Detail": "任务完成，释放实例（等待 1.15009094s）"
+    },
+    {
+      "At": 8525909090,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 49,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 845.36367ms）"
+    },
+    {
+      "At": 8532000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 52,
+      "Worker": 2,
+      "Detail": "任务完成，释放实例（等待 569.72731ms）"
+    },
+    {
+      "At": 8541000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 47,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 1.00627276s）"
+    },
+    {
+      "At": 8601000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 50,
+      "Worker": 7,
+      "Detail": "任务完成，释放实例（等待 710.54549ms）"
+    },
+    {
+      "At": 8670000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 53,
+      "Worker": 8,
+      "Detail": "任务完成，释放实例（等待 501.81822ms）"
+    },
+    {
+      "At": 8672000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 68,
+      "Worker": 3,
+      "Detail": "任务完成，释放实例（等待 257.000004ms）"
+    },
+    {
+      "At": 8834000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 70,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 70（成本 416ms）"
+    },
+    {
+      "At": 8974000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 71,
+      "Worker": 4,
+      "Detail": "任务完成，释放实例（等待 391ms）"
+    },
+    {
+      "At": 9250000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 70,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 10035000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 72,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 72（成本 327ms）"
+    },
+    {
+      "At": 10040000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 109,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 109（成本 407ms）"
+    },
+    {
+      "At": 10122111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 73,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 73（成本 272ms）"
+    },
+    {
+      "At": 10362000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 72,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 10362000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 74,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 74（成本 261ms）"
+    },
+    {
+      "At": 10394111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 73,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 10394111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 75,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 75（成本 271ms）"
+    },
+    {
+      "At": 10447000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 109,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 10447000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 110,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 110（成本 434ms）"
+    },
+    {
+      "At": 10623000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 74,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 184.777778ms）"
+    },
+    {
+      "At": 10623000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 76,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 76（成本 258ms）"
+    },
+    {
+      "At": 10665111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 75,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 75.777778ms）"
+    },
+    {
+      "At": 10665111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 77,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 77（成本 275ms）"
+    },
+    {
+      "At": 10881000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 110,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 42ms）"
+    },
+    {
+      "At": 10881000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 111,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 111（成本 419ms）"
+    },
+    {
+      "At": 10881000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 76,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 207.555556ms）"
+    },
+    {
+      "At": 10881000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 78,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 78（成本 257ms）"
+    },
+    {
+      "At": 10940111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 77,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 76.555556ms）"
+    },
+    {
+      "At": 10940111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 79,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 79（成本 255ms）"
+    },
+    {
+      "At": 11138000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 78,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 222.333334ms）"
+    },
+    {
+      "At": 11138000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 80,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 80（成本 254ms）"
+    },
+    {
+      "At": 11195111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 79,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 130.333334ms）"
+    },
+    {
+      "At": 11195111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 81,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 81（成本 258ms）"
+    },
+    {
+      "At": 11300000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 111,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 82ms）"
+    },
+    {
+      "At": 11300000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 112,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 112（成本 378ms）"
+    },
+    {
+      "At": 11392000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 80,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 277.111112ms）"
+    },
+    {
+      "At": 11392000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 82,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 82（成本 311ms）"
+    },
+    {
+      "At": 11453111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 81,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 220.111112ms）"
+    },
+    {
+      "At": 11453111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 83,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 83（成本 311ms）"
+    },
+    {
+      "At": 11678000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 112,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 120ms）"
+    },
+    {
+      "At": 11678000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 113,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 113（成本 386ms）"
+    },
+    {
+      "At": 11703000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 82,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 249.88889ms）"
+    },
+    {
+      "At": 11703000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 84,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 84（成本 312ms）"
+    },
+    {
+      "At": 11764111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 83,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 232.88889ms）"
+    },
+    {
+      "At": 11764111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 85,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 85（成本 301ms）"
+    },
+    {
+      "At": 12015000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 84,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 328.666668ms）"
+    },
+    {
+      "At": 12015000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 86,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 86（成本 346ms）"
+    },
+    {
+      "At": 12064000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 113,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 55ms）"
+    },
+    {
+      "At": 12064000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 114,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 114（成本 442ms）"
+    },
+    {
+      "At": 12065111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 85,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 313.666668ms）"
+    },
+    {
+      "At": 12065111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 87,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 87（成本 308ms）"
+    },
+    {
+      "At": 12361000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 86,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 506.444446ms）"
+    },
+    {
+      "At": 12361000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 88,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 88（成本 310ms）"
+    },
+    {
+      "At": 12373111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 87,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 355.444446ms）"
+    },
+    {
+      "At": 12373111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 89,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 89（成本 312ms）"
+    },
+    {
+      "At": 12506000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 114,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 90ms）"
+    },
+    {
+      "At": 12506000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 115,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 115（成本 421ms）"
+    },
+    {
+      "At": 12671000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 88,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 559.222224ms）"
+    },
+    {
+      "At": 12671000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 90,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 90（成本 331ms）"
+    },
+    {
+      "At": 12685111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 89,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 488.222224ms）"
+    },
+    {
+      "At": 12685111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 91,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 91（成本 251ms）"
+    },
+    {
+      "At": 12927000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 115,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 87ms）"
+    },
+    {
+      "At": 12927000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 116,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 116（成本 423ms）"
+    },
+    {
+      "At": 12936111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 91,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 560.000002ms）"
+    },
+    {
+      "At": 12936111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 92,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 92（成本 275ms）"
+    },
+    {
+      "At": 13002000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 90,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 630.000002ms）"
+    },
+    {
+      "At": 13002000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 93,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 93（成本 329ms）"
+    },
+    {
+      "At": 13211111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 92,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 717.888891ms）"
+    },
+    {
+      "At": 13211111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 94,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 94（成本 326ms）"
+    },
+    {
+      "At": 13331000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 93,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 667.666669ms）"
+    },
+    {
+      "At": 13331000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 95,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 95（成本 342ms）"
+    },
+    {
+      "At": 13350000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 116,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 177ms）"
+    },
+    {
+      "At": 13350000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 117,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 117（成本 411ms）"
+    },
+    {
+      "At": 13537111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 94,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 805.666669ms）"
+    },
+    {
+      "At": 13537111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 96,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 96（成本 300ms）"
+    },
+    {
+      "At": 13673000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 95,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 760.444447ms）"
+    },
+    {
+      "At": 13673000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 97,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 97（成本 299ms）"
+    },
+    {
+      "At": 13761000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 117,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 161ms）"
+    },
+    {
+      "At": 13761000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 118,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 118（成本 450ms）"
+    },
+    {
+      "At": 13837111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 96,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 840.444447ms）"
+    },
+    {
+      "At": 13837111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 98,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 98（成本 295ms）"
+    },
+    {
+      "At": 13972000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 97,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 853.222225ms）"
+    },
+    {
+      "At": 13972000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 99,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 99（成本 330ms）"
+    },
+    {
+      "At": 14000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 100,
+      "Worker": 10,
+      "Detail": "同类空闲实例就绪，安排任务 100（成本 289ms）"
+    },
+    {
+      "At": 14000000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 101,
+      "Worker": 11,
+      "Detail": "同类空闲实例就绪，安排任务 101（成本 350ms）"
+    },
+    {
+      "At": 14132111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 98,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 912.222225ms）"
+    },
+    {
+      "At": 14132111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 102,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 102（成本 311ms）"
+    },
+    {
+      "At": 14211000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 118,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 192ms）"
+    },
+    {
+      "At": 14211000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 125,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 125（成本 570ms）"
+    },
+    {
+      "At": 14289000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 100,
+      "Worker": 10,
+      "Detail": "任务完成，释放实例（等待 932.888892ms）"
+    },
+    {
+      "At": 14289000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 103,
+      "Worker": 10,
+      "Detail": "同类空闲实例就绪，安排任务 103（成本 319ms）"
+    },
+    {
+      "At": 14302000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 99,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 938.000003ms）"
+    },
+    {
+      "At": 14302000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 104,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 104（成本 264ms）"
+    },
+    {
+      "At": 14350000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 101,
+      "Worker": 11,
+      "Detail": "任务完成，释放实例（等待 794.777781ms）"
+    },
+    {
+      "At": 14350000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 105,
+      "Worker": 11,
+      "Detail": "同类空闲实例就绪，安排任务 105（成本 260ms）"
+    },
+    {
+      "At": 14443111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 102,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 801.777781ms）"
+    },
+    {
+      "At": 14443111111,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 106,
+      "Worker": 9,
+      "Detail": "同类空闲实例就绪，安排任务 106（成本 330ms）"
+    },
+    {
+      "At": 14566000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 104,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 697.444448ms）"
+    },
+    {
+      "At": 14566000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 107,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 107（成本 291ms）"
+    },
+    {
+      "At": 14608000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 103,
+      "Worker": 10,
+      "Detail": "任务完成，释放实例（等待 854.555559ms）"
+    },
+    {
+      "At": 14608000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 119,
+      "Worker": 10,
+      "Detail": "同类空闲实例就绪，安排任务 119（成本 449ms）"
+    },
+    {
+      "At": 14610000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 105,
+      "Worker": 11,
+      "Detail": "任务完成，释放实例（等待 680.333337ms）"
+    },
+    {
+      "At": 14610000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 108,
+      "Worker": 11,
+      "Detail": "同类空闲实例就绪，安排任务 108（成本 267ms）"
+    },
+    {
+      "At": 14773111111,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 106,
+      "Worker": 9,
+      "Detail": "任务完成，释放实例（等待 615.333337ms）"
+    },
+    {
+      "At": 14781000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 125,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 152ms）"
+    },
+    {
+      "At": 14857000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 107,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 707.111115ms）"
+    },
+    {
+      "At": 14877000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 108,
+      "Worker": 11,
+      "Detail": "任务完成，释放实例（等待 602.000004ms）"
+    },
+    {
+      "At": 14994000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 120,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 120（成本 402ms）"
+    },
+    {
+      "At": 15057000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 119,
+      "Worker": 10,
+      "Detail": "任务完成，释放实例（等待 608ms）"
+    },
+    {
+      "At": 15396000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 120,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 16011000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 121,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 121（成本 426ms）"
+    },
+    {
+      "At": 16430000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 126,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 126（成本 590ms）"
+    },
+    {
+      "At": 16437000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 121,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 16948000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 122,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 122（成本 448ms）"
+    },
+    {
+      "At": 17020000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 126,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 17396000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 122,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 17923000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 123,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 123（成本 437ms）"
+    },
+    {
+      "At": 18360000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 123,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 19060000000,
+      "Action": "assign",
+      "Class": "cpu",
+      "Job": 124,
+      "Worker": 1,
+      "Detail": "同类空闲实例就绪，安排任务 124（成本 461ms）"
+    },
+    {
+      "At": 19143000000,
+      "Action": "assign",
+      "Class": "gpu",
+      "Job": 127,
+      "Worker": 5,
+      "Detail": "同类空闲实例就绪，安排任务 127（成本 604ms）"
+    },
+    {
+      "At": 19521000000,
+      "Action": "complete",
+      "Class": "cpu",
+      "Job": 124,
+      "Worker": 1,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    },
+    {
+      "At": 19747000000,
+      "Action": "complete",
+      "Class": "gpu",
+      "Job": 127,
+      "Worker": 5,
+      "Detail": "任务完成，释放实例（等待 0s）"
+    }
+  ],
   "per_class": {
     "cpu": {
       "Submitted": 98,
       "Completed": 91,
       "Rejected": 7,
       "Waited": 80,
+      "Unknown": 0,
       "TotalWait": 57668323990,
       "MaxWait": 2000000000
     },
@@ -467,6 +2390,7 @@
       "Completed": 29,
       "Rejected": 0,
       "Waited": 26,
+      "Unknown": 0,
       "TotalWait": 12399000026,
       "MaxWait": 2963000000
     }
@@ -476,6 +2400,7 @@
     "Completed": 120,
     "Rejected": 7,
     "Waited": 106,
+    "Unknown": 0,
     "TotalWait": 70067324016,
     "MaxWait": 2963000000
   }

@@ -13,6 +13,8 @@ const (
 	ActionScaleUp   Action = "scale_up"
 	ActionScaleDown Action = "scale_down"
 	ActionHold      Action = "hold"
+	// ActionReplace 不是扩缩容，而是为失联工作者补充接替实例的决定。
+	ActionReplace Action = "replace"
 )
 
 // Log 是一条可落盘的决策依据：时间、类别、动作、容量变化与可读原因。
@@ -83,9 +85,17 @@ func (s *QueueRateStrategy) Decide(in metrics.Snapshot) (int, Action, string) {
 		requiredByRate = 0
 	}
 	highWatermark := in.QueueCap / 2
-	pressureTarget := in.Busy + (in.QueueLength+1)/2
+	// 失联工作者的在途任务状态未知，可能还要重做：
+	// 把未知任务计入队列压力，而不是只看未来容量。
+	effectiveQueue := in.QueueLength + in.UnknownTasks
+	pressureTarget := in.Busy + (effectiveQueue+1)/2
 
 	switch {
+	case in.Lost > 0 || in.UnknownTasks > 0:
+		return current, ActionHold, fmt.Sprintf(
+			"类别 %s 有 %d 名工作者失联待确认、%d 个在途任务状态未知：失效容量尚未清算，本轮不扩不缩，等待接替与操作者确认",
+			in.Class, in.Lost, in.UnknownTasks)
+
 	case current >= in.Max && (in.QueueLength > 0 || requiredByRate > current):
 		return current, ActionHold, fmt.Sprintf(
 			"类别 %s 已达上限 %d：速率需 %d 人、队列 %d/%d，新增容量不可得，继续按准入规则拒绝",

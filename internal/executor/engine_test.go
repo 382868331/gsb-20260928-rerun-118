@@ -135,6 +135,128 @@ func TestDrainAndNoImmediateFlapping(t *testing.T) {
 	}
 }
 
+func TestFaultKeepsInflightUnknownUntilConfirm(t *testing.T) {
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: 3 * time.Second, Service: 5 * time.Second, Class: "gpu"},
+	}
+	faults := []Fault{{At: 4 * time.Second, Class: "gpu", Busy: true}}
+	confirms := []Confirmation{{At: 8 * time.Second, Class: "gpu"}}
+
+	result, err := engine.RunWithEvents(jobs, faults, confirms)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Submitted != 1 || gpu.Completed != 1 || gpu.Unknown != 0 {
+		t.Fatalf("gpu counters = %+v, want unknown resolved and completed after confirm", gpu)
+	}
+	var sawLost, sawReplace, sawReadyBeforeConfirm, sawRequeue bool
+	for _, entry := range result.TaskLogs {
+		switch entry.Action {
+		case "lost":
+			sawLost = true
+		case "requeue":
+			sawRequeue = true
+			if entry.At < 8*time.Second {
+				t.Fatalf("unknown task requeued before operator confirm at %s", entry.At)
+			}
+		case "replace_ready":
+			if entry.At < 8*time.Second {
+				sawReadyBeforeConfirm = true
+			}
+		}
+	}
+	for _, entry := range result.Logs {
+		if entry.Action == decision.ActionReplace {
+			sawReplace = true
+		}
+	}
+	if !sawLost || !sawReplace || !sawRequeue {
+		t.Fatalf("want lost/replace/requeue trail, got %+v", result.TaskLogs)
+	}
+	if !sawReadyBeforeConfirm {
+		t.Fatal("want replacement ready before confirm without clearing unknown state")
+	}
+}
+
+func TestUnknownTaskBlocksScaleDown(t *testing.T) {
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: 3 * time.Second, Service: 5 * time.Second, Class: "gpu"},
+	}
+	// 失联后不做操作者确认：未知任务一直挂账，gpu 不得缩容。
+	faults := []Fault{{At: 4 * time.Second, Class: "gpu", Busy: true}}
+
+	result, err := engine.RunWithEvents(jobs, faults, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpu := result.PerClass["gpu"]
+	if gpu.Unknown != 1 || gpu.Completed != 0 {
+		t.Fatalf("gpu counters = %+v, want 1 unknown and no completion without confirm", gpu)
+	}
+	for _, entry := range result.Logs {
+		if entry.Class == "gpu" && entry.Action == decision.ActionScaleDown {
+			t.Fatalf("scale down at %s while unknown task pending", entry.At)
+		}
+	}
+}
+
+func TestSubstituteOnlyWhenDeclaredAndExhausted(t *testing.T) {
+	cfg := testConfig()
+	gpu := cfg.Classes["gpu"]
+	gpu.Substitutes = []string{"cpu"}
+	gpu.Max = 1 // 容量耗尽：Min=1 且不能继续扩容
+	cfg.Classes["gpu"] = gpu
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	// gpu 工作者 3 秒就绪后被长任务占满；后续 gpu 任务只能走预先声明的 cpu 替代。
+	jobs := []Job{
+		{Arrival: 3 * time.Second, Service: 10 * time.Second, Class: "gpu"},
+		{Arrival: 3500 * time.Millisecond, Service: time.Second, Class: "gpu"},
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpuCounters := result.PerClass["gpu"]
+	if gpuCounters.Completed != 2 || gpuCounters.Rejected != 0 {
+		t.Fatalf("gpu counters = %+v, want both completed via declared substitute", gpuCounters)
+	}
+	found := false
+	for _, entry := range result.TaskLogs {
+		if entry.Action == "substitute" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("want a substitute assignment with recorded reason")
+	}
+}
+
+func TestNoSubstituteWithoutDeclaration(t *testing.T) {
+	engine := New(testConfig(), decision.NewQueueRateStrategy())
+	// 未声明兼容范围：gpu 忙碌时 gpu 任务只能排队或拒绝，
+	// 即使 cpu 空闲也不允许放宽亲和性。
+	jobs := []Job{
+		{Arrival: 3 * time.Second, Service: 5 * time.Second, Class: "gpu"},
+		{Arrival: 3500 * time.Millisecond, Service: time.Second, Class: "gpu"},
+	}
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range result.TaskLogs {
+		if entry.Action == "substitute" {
+			t.Fatalf("unexpected substitute without declaration: %+v", entry)
+		}
+	}
+	if got := result.PerClass["gpu"].Completed; got != 2 {
+		t.Fatalf("gpu completed = %d, want 2 after queueing for gpu worker", got)
+	}
+}
+
 func TestUnknownClassRejected(t *testing.T) {
 	engine := New(testConfig(), decision.NewQueueRateStrategy())
 	_, err := engine.Run([]Job{{Arrival: 0, Service: time.Second, Class: "tpu"}})

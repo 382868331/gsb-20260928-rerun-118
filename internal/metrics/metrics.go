@@ -10,12 +10,14 @@ type Snapshot struct {
 	Min   int
 	Max   int
 
-	Ready       int
-	Starting    int
-	Busy        int
-	Draining    int
-	QueueLength int
-	QueueCap    int
+	Ready        int
+	Starting     int
+	Busy         int
+	Draining     int
+	Lost         int
+	UnknownTasks int
+	QueueLength  int
+	QueueCap     int
 
 	ArrivalsInWindow    int
 	CompletionsInWindow int
@@ -30,6 +32,9 @@ type Counters struct {
 	Completed int
 	Rejected  int
 	Waited    int
+	// Unknown 是失联工作者上在途任务的当前未知状态数：
+	// 可能已产生效果，需操作者确认后才能继续或清算。
+	Unknown int
 
 	TotalWait time.Duration
 	MaxWait   time.Duration
@@ -47,6 +52,14 @@ func (c *Counters) RecordArrival() {
 func (c *Counters) RecordRejection() {
 	c.Rejected++
 	c.windowRejections++
+}
+
+func (c *Counters) RecordUnknown() {
+	c.Unknown++
+}
+
+func (c *Counters) RecordUnknownResolved() {
+	c.Unknown--
 }
 
 func (c *Counters) RecordCompletion(wait time.Duration) {
@@ -83,6 +96,7 @@ func (c *Counters) Add(other Counters) {
 	c.Completed += other.Completed
 	c.Rejected += other.Rejected
 	c.Waited += other.Waited
+	c.Unknown += other.Unknown
 	c.TotalWait += other.TotalWait
 	if other.MaxWait > c.MaxWait {
 		c.MaxWait = other.MaxWait

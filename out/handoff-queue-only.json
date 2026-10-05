@@ -136,9 +136,9 @@
       "At": 9000000000,
       "Class": "cpu",
       "Action": "hold",
-      "From": 1,
+      "From": 2,
       "To": 2,
-      "Reason": "类别 cpu 队列空但 1 人仍忙碌，已就绪 1 人无需调整"
+      "Reason": "类别 cpu 队列空但 2 人仍忙碌，已就绪 2 人无需调整"
     },
     {
       "At": 9000000000,
@@ -146,57 +146,57 @@
       "Action": "scale_up",
       "From": 1,
       "To": 2,
+      "Reason": "类别 gpu 队列 2/2 达到高水位 1，按已就绪 0 人扩容到 2（不看速率、不计在途扩容 1 人）"
+    },
+    {
+      "At": 10000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 10000000000,
+      "Class": "gpu",
+      "Action": "scale_up",
+      "From": 1,
+      "To": 2,
+      "Reason": "类别 gpu 队列 2/2 达到高水位 1，按已就绪 0 人扩容到 2（不看速率、不计在途扩容 1 人）"
+    },
+    {
+      "At": 11000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 11000000000,
+      "Class": "gpu",
+      "Action": "scale_up",
+      "From": 1,
+      "To": 2,
+      "Reason": "类别 gpu 队列 2/2 达到高水位 1，按已就绪 0 人扩容到 2（不看速率、不计在途扩容 1 人）"
+    },
+    {
+      "At": 12000000000,
+      "Class": "cpu",
+      "Action": "hold",
+      "From": 1,
+      "To": 2,
+      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+    },
+    {
+      "At": 12000000000,
+      "Class": "gpu",
+      "Action": "scale_up",
+      "From": 1,
+      "To": 2,
       "Reason": "类别 gpu 队列 1/2 达到高水位 1，按已就绪 1 人扩容到 2（不看速率、不计在途扩容 0 人）"
     },
     {
-      "At": 10000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 1,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
-    },
-    {
-      "At": 10000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 1,
-      "To": 2,
-      "Reason": "类别 gpu 队列空但 1 人仍忙碌，已就绪 1 人无需调整"
-    },
-    {
-      "At": 11000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 1,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
-    },
-    {
-      "At": 11000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 1,
-      "To": 2,
-      "Reason": "类别 gpu 队列空但 1 人仍忙碌，已就绪 1 人无需调整"
-    },
-    {
-      "At": 12000000000,
-      "Class": "cpu",
-      "Action": "hold",
-      "From": 1,
-      "To": 2,
-      "Reason": "类别 cpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
-    },
-    {
-      "At": 12000000000,
-      "Class": "gpu",
-      "Action": "hold",
-      "From": 1,
-      "To": 2,
-      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
-    },
-    {
       "At": 13000000000,
       "Class": "cpu",
       "Action": "hold",
@@ -210,7 +210,7 @@
       "Action": "hold",
       "From": 1,
       "To": 2,
-      "Reason": "类别 gpu 队列空但 0 人仍忙碌，已就绪 1 人无需调整"
+      "Reason": "类别 gpu 队列空但 1 人仍忙碌，已就绪 1 人无需调整"
     },
     {
       "At": 14000000000,
@@ -520,22 +520,31 @@
       "Reason": "替代实例就绪但不自动认定旧实例停止；等待人工确认旧效果"
     },
     {
-      "At": 4400000000,
-      "Kind": "confirm_effect",
-      "JobID": 4,
-      "JobClass": "gpu",
+      "At": 4500000000,
+      "Kind": "review_round",
+      "JobID": 0,
+      "JobClass": "",
       "WorkerID": 0,
       "WorkerClass": "",
-      "Reason": "操作者确认旧效果不存在；允许接替执行剩余任务"
+      "Reason": "操作者 alice 提交第 1 轮核对：共 2 项，适用 1 项，冲突 1 项"
     },
     {
-      "At": 4400000000,
-      "Kind": "takeover",
+      "At": 4500000000,
+      "Kind": "review_conflict",
+      "JobID": 5,
+      "JobClass": "",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务当前不在失联待核对队列中"
+    },
+    {
+      "At": 4500000000,
+      "Kind": "keep_waiting",
       "JobID": 4,
       "JobClass": "gpu",
       "WorkerID": 1,
       "WorkerClass": "cpu",
-      "Reason": "人工确认旧效果不存在；替代实例已就绪，执行剩余任务"
+      "Reason": "材料仍不足；保留未知并继续等待后续轮次核对，不执行任何效果"
     },
     {
       "At": 4882000000,
@@ -554,24 +563,6 @@
       "WorkerID": 2,
       "WorkerClass": "cpu",
       "Reason": "同类空闲实例领取未开始任务"
-    },
-    {
-      "At": 4905000000,
-      "Kind": "complete",
-      "JobID": 4,
-      "JobClass": "gpu",
-      "WorkerID": 1,
-      "WorkerClass": "cpu",
-      "Reason": "接替实例完成剩余任务，旧效果已由人工确认不存在"
-    },
-    {
-      "At": 4905000000,
-      "Kind": "release",
-      "JobID": 4,
-      "JobClass": "gpu",
-      "WorkerID": 1,
-      "WorkerClass": "cpu",
-      "Reason": "跨类接替任务完成，释放专用替代实例"
     },
     {
       "At": 5152000000,
@@ -646,22 +637,76 @@
       "Reason": "任务由原执行实例完成并释放容量"
     },
     {
-      "At": 8487000000,
-      "Kind": "complete",
+      "At": 8200000000,
+      "Kind": "lose_worker",
       "JobID": 5,
       "JobClass": "gpu",
       "WorkerID": 4,
       "WorkerClass": "gpu",
-      "Reason": "任务由原执行实例完成并释放容量"
+      "Reason": "工作者失联：旧实例不再接收队列，但失联不等于已停止"
     },
     {
-      "At": 8487000000,
-      "Kind": "assign",
-      "JobID": 6,
+      "At": 8200000000,
+      "Kind": "mark_unknown",
+      "JobID": 5,
       "JobClass": "gpu",
       "WorkerID": 4,
       "WorkerClass": "gpu",
-      "Reason": "同类空闲实例领取未开始任务"
+      "Reason": "任务可能已经产生外部效果；在人工确认前不自动重放、不计完成"
+    },
+    {
+      "At": 8200000000,
+      "Kind": "reserve_standby",
+      "JobID": 5,
+      "JobClass": "gpu",
+      "WorkerID": 2,
+      "WorkerClass": "cpu",
+      "Reason": "替代实例就绪但不自动认定旧实例停止；等待人工确认旧效果"
+    },
+    {
+      "At": 8600000000,
+      "Kind": "review_round",
+      "JobID": 0,
+      "JobClass": "",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "操作者 bob 提交第 2 轮核对：共 2 项，适用 2 项，冲突 0 项"
+    },
+    {
+      "At": 8600000000,
+      "Kind": "confirm_effect",
+      "JobID": 4,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "操作者确认旧效果不存在；允许接替执行剩余任务"
+    },
+    {
+      "At": 8600000000,
+      "Kind": "takeover",
+      "JobID": 4,
+      "JobClass": "gpu",
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "人工确认旧效果不存在；替代实例已就绪，执行剩余任务"
+    },
+    {
+      "At": 8600000000,
+      "Kind": "release",
+      "JobID": 5,
+      "JobClass": "gpu",
+      "WorkerID": 2,
+      "WorkerClass": "cpu",
+      "Reason": "操作者确认旧任务已生效；取消接替执行并释放替代实例"
+    },
+    {
+      "At": 8600000000,
+      "Kind": "confirm_effect",
+      "JobID": 5,
+      "JobClass": "gpu",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "操作者确认旧效果已产生；只保留结果，不重复执行"
     },
     {
       "At": 8803000000,
@@ -682,6 +727,33 @@
       "Reason": "同类空闲实例领取未开始任务"
     },
     {
+      "At": 9000000000,
+      "Kind": "review_round",
+      "JobID": 0,
+      "JobClass": "",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "操作者 alice 提交第 3 轮核对：共 2 项，适用 0 项，冲突 2 项"
+    },
+    {
+      "At": 9000000000,
+      "Kind": "review_conflict",
+      "JobID": 4,
+      "JobClass": "",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务已在第 2 轮由 bob 确认为 not_happened（重新运行=true）；过期决定不得重新执行已确认的效果"
+    },
+    {
+      "At": 9000000000,
+      "Kind": "review_conflict",
+      "JobID": 5,
+      "JobClass": "",
+      "WorkerID": 0,
+      "WorkerClass": "",
+      "Reason": "任务已在第 2 轮由 bob 确认为 happened（重新运行=false）；过期决定不得重新执行已确认的效果"
+    },
+    {
       "At": 9081000000,
       "Kind": "complete",
       "JobID": 17,
@@ -691,34 +763,282 @@
       "Reason": "任务由原执行实例完成并释放容量"
     },
     {
-      "At": 9755000000,
+      "At": 9105000000,
       "Kind": "complete",
-      "JobID": 6,
+      "JobID": 4,
       "JobClass": "gpu",
-      "WorkerID": 4,
-      "WorkerClass": "gpu",
-      "Reason": "任务由原执行实例完成并释放容量"
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "接替实例完成剩余任务，旧效果已由人工确认不存在"
     },
     {
-      "At": 9755000000,
-      "Kind": "assign",
-      "JobID": 13,
+      "At": 9105000000,
+      "Kind": "release",
+      "JobID": 4,
       "JobClass": "gpu",
-      "WorkerID": 4,
+      "WorkerID": 1,
+      "WorkerClass": "cpu",
+      "Reason": "跨类接替任务完成，释放专用替代实例"
+    },
+    {
+      "At": 11200000000,
+      "Kind": "assign",
+      "JobID": 6,
+      "JobClass": "gpu",
+      "WorkerID": 5,
       "WorkerClass": "gpu",
       "Reason": "同类空闲实例领取未开始任务"
     },
     {
-      "At": 11083000000,
+      "At": 12468000000,
+      "Kind": "complete",
+      "JobID": 6,
+      "JobClass": "gpu",
+      "WorkerID": 5,
+      "WorkerClass": "gpu",
+      "Reason": "任务由原执行实例完成并释放容量"
+    },
+    {
+      "At": 12468000000,
+      "Kind": "assign",
+      "JobID": 13,
+      "JobClass": "gpu",
+      "WorkerID": 5,
+      "WorkerClass": "gpu",
+      "Reason": "同类空闲实例领取未开始任务"
+    },
+    {
+      "At": 13796000000,
       "Kind": "complete",
       "JobID": 13,
       "JobClass": "gpu",
-      "WorkerID": 4,
+      "WorkerID": 5,
       "WorkerClass": "gpu",
       "Reason": "任务由原执行实例完成并释放容量"
     }
   ],
   "unknown": null,
+  "review": {
+    "rounds": [
+      {
+        "round": {
+          "id": 1,
+          "operator": "alice",
+          "opened_at": 4300000000,
+          "decided_at": 4500000000,
+          "items": [
+            {
+              "job_id": 4,
+              "decision": "insufficient",
+              "basis": 0
+            },
+            {
+              "job_id": 5,
+              "decision": "not_happened",
+              "basis": 0
+            }
+          ]
+        },
+        "preview": {
+          "round_id": 1,
+          "operator": "alice",
+          "decided_at": 4500000000,
+          "applicable": [
+            {
+              "job_id": 4,
+              "decision": "insufficient",
+              "basis": 0
+            }
+          ],
+          "effects": [
+            {
+              "job_id": 4,
+              "decision": "insufficient",
+              "effect": "keep_waiting",
+              "detail": "材料仍不足：保持未知，替代实例继续待命，留待后续轮次核对"
+            }
+          ],
+          "conflicts": [
+            {
+              "round_id": 1,
+              "operator": "alice",
+              "job_id": 5,
+              "decision": "not_happened",
+              "given_basis": 0,
+              "reason": "任务当前不在失联待核对队列中"
+            }
+          ]
+        },
+        "accepted": [
+          {
+            "job_id": 4,
+            "decision": "insufficient",
+            "basis": 0
+          }
+        ]
+      },
+      {
+        "round": {
+          "id": 2,
+          "operator": "bob",
+          "opened_at": 8300000000,
+          "decided_at": 8600000000,
+          "items": [
+            {
+              "job_id": 4,
+              "decision": "not_happened",
+              "basis": 0
+            },
+            {
+              "job_id": 5,
+              "decision": "happened",
+              "basis": 0
+            }
+          ]
+        },
+        "preview": {
+          "round_id": 2,
+          "operator": "bob",
+          "decided_at": 8600000000,
+          "applicable": [
+            {
+              "job_id": 4,
+              "decision": "not_happened",
+              "basis": 0
+            },
+            {
+              "job_id": 5,
+              "decision": "happened",
+              "basis": 0
+            }
+          ],
+          "effects": [
+            {
+              "job_id": 4,
+              "decision": "not_happened",
+              "effect": "schedule_takeover",
+              "worker_id": 1,
+              "worker_class": "cpu",
+              "detail": "替代实例 1/cpu 已就绪，确认后立即接替执行剩余 505ms"
+            },
+            {
+              "job_id": 5,
+              "decision": "happened",
+              "effect": "release_capacity",
+              "worker_id": 2,
+              "worker_class": "cpu",
+              "detail": "确认旧结果有效：取消接替并释放待命替代实例 2/cpu，不重新执行任务"
+            }
+          ],
+          "conflicts": null
+        },
+        "accepted": [
+          {
+            "job_id": 4,
+            "decision": "not_happened",
+            "basis": 0
+          },
+          {
+            "job_id": 5,
+            "decision": "happened",
+            "basis": 0
+          }
+        ]
+      },
+      {
+        "round": {
+          "id": 3,
+          "operator": "alice",
+          "opened_at": 8700000000,
+          "decided_at": 9000000000,
+          "items": [
+            {
+              "job_id": 4,
+              "decision": "happened",
+              "basis": 0
+            },
+            {
+              "job_id": 5,
+              "decision": "not_happened",
+              "basis": 0
+            }
+          ]
+        },
+        "preview": {
+          "round_id": 3,
+          "operator": "alice",
+          "decided_at": 9000000000,
+          "applicable": null,
+          "effects": null,
+          "conflicts": [
+            {
+              "round_id": 3,
+              "operator": "alice",
+              "job_id": 4,
+              "decision": "happened",
+              "given_basis": 0,
+              "reason": "任务已在第 2 轮由 bob 确认为 not_happened（重新运行=true）；过期决定不得重新执行已确认的效果"
+            },
+            {
+              "round_id": 3,
+              "operator": "alice",
+              "job_id": 5,
+              "decision": "not_happened",
+              "given_basis": 0,
+              "reason": "任务已在第 2 轮由 bob 确认为 happened（重新运行=false）；过期决定不得重新执行已确认的效果"
+            }
+          ]
+        },
+        "accepted": null
+      }
+    ],
+    "takeovers": [
+      {
+        "job_id": 4,
+        "class": "gpu",
+        "round_id": 2,
+        "operator": "bob",
+        "confirmed_at": 8600000000,
+        "started_at": 8600000000,
+        "completed_at": 9105000000,
+        "remaining": 505000000,
+        "worker_id": 1,
+        "worker_class": "cpu",
+        "rerun": true,
+        "status": "completed"
+      },
+      {
+        "job_id": 5,
+        "class": "gpu",
+        "round_id": 2,
+        "operator": "bob",
+        "confirmed_at": 8600000000,
+        "remaining": 287000000,
+        "worker_id": 2,
+        "worker_class": "cpu",
+        "rerun": false,
+        "status": "confirmed_old_result"
+      }
+    ],
+    "resolved": [
+      {
+        "job_id": 4,
+        "decision": "not_happened",
+        "round_id": 2,
+        "operator": "bob",
+        "at": 8600000000,
+        "rerun": true
+      },
+      {
+        "job_id": 5,
+        "decision": "happened",
+        "round_id": 2,
+        "operator": "bob",
+        "at": 8600000000,
+        "rerun": false
+      }
+    ]
+  },
   "per_class": {
     "cpu": {
       "Submitted": 8,
@@ -735,8 +1055,8 @@
       "Rejected": 5,
       "Unknown": 0,
       "Waited": 4,
-      "TotalWait": 14872000000,
-      "MaxWait": 5695000000
+      "TotalWait": 24498000000,
+      "MaxWait": 8408000000
     }
   },
   "total": {
@@ -745,7 +1065,7 @@
     "Rejected": 5,
     "Unknown": 0,
     "Waited": 6,
-    "TotalWait": 17631000000,
-    "MaxWait": 5695000000
+    "TotalWait": 27257000000,
+    "MaxWait": 8408000000
   }
 }

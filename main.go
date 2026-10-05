@@ -23,6 +23,7 @@ type replayRecord struct {
 	Logs     []decision.Log              `json:"logs"`
 	Events   []executor.AuditEvent       `json:"events"`
 	Unknown  []executor.UnknownJob       `json:"unknown"`
+	Review   executor.ReviewJournal      `json:"review,omitempty"`
 	PerClass map[string]metrics.Counters `json:"per_class"`
 	Total    metrics.Counters            `json:"total"`
 }
@@ -70,6 +71,7 @@ func main() {
 			record := replayRecord{
 				Scenario: scenarioName, Strategy: strategyName, Seed: *seed,
 				Jobs: len(jobs), Logs: result.Logs, Events: result.Events, Unknown: result.Unknown,
+				Review:   result.Review,
 				PerClass: result.PerClass, Total: result.Total,
 			}
 			path := filepath.Join(*outDir, scenarioName+"-"+strategyName+".json")
@@ -77,6 +79,13 @@ func main() {
 			if err := os.WriteFile(path, data, 0o644); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
+			}
+			if scenarioName == "handoff" && len(result.Review.Rounds) > 0 {
+				journalPath := filepath.Join(*outDir, scenarioName+"-"+strategyName+"-review.json")
+				if err := executor.SaveJournal(journalPath, result.Review); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
 			}
 			if *verbose {
 				printDecisions(scenarioName, strategyName, result)
@@ -110,8 +119,38 @@ func handoffConfigs(scenario string) executor.Config {
 	gpu.QueueCap = 2
 	cfg.Classes["gpu"] = gpu
 	cfg.Compatibility = map[string][]string{"gpu": {"gpu", "cpu"}}
-	cfg.Failures = []executor.Failure{{At: 4200 * time.Millisecond, JobID: 4}}
-	cfg.Confirmations = []executor.OutcomeConfirmation{{At: 4400 * time.Millisecond, JobID: 4}}
+	// 两名忙碌 gpu 工作者先后失联，产生两个等待人工核对的未知任务。
+	cfg.Failures = []executor.Failure{
+		{At: 4200 * time.Millisecond, JobID: 4},
+		{At: 8200 * time.Millisecond, JobID: 5},
+	}
+	// 分批人工核对工作台：操作者按不同时间看到的任务状态组成核对轮次。
+	// 第 1 轮（alice）：两项一起核对——任务 4 材料仍不足先保留，任务 5 当时尚未失联，属过期项。
+	// 第 2 轮（bob）：确认任务 4 旧效果不存在（安排接替），任务 5 旧效果已发生（释放容量）。
+	// 第 3 轮（alice）：其依据停留在任务 4、5 失联时的旧状态；两项都已解决，决定过期，明确列冲突且不重复执行。
+	cfg.ReviewRounds = []executor.ReviewRound{
+		{
+			ID: 1, Operator: "alice", OpenedAt: 4300 * time.Millisecond, DecidedAt: 4500 * time.Millisecond,
+			Items: []executor.ReviewItem{
+				{JobID: 4, Decision: executor.DecisionInsufficient, Basis: 0},
+				{JobID: 5, Decision: executor.DecisionNotHappened, Basis: 0},
+			},
+		},
+		{
+			ID: 2, Operator: "bob", OpenedAt: 8300 * time.Millisecond, DecidedAt: 8600 * time.Millisecond,
+			Items: []executor.ReviewItem{
+				{JobID: 4, Decision: executor.DecisionNotHappened, Basis: 0},
+				{JobID: 5, Decision: executor.DecisionHappened, Basis: 0},
+			},
+		},
+		{
+			ID: 3, Operator: "alice", OpenedAt: 8700 * time.Millisecond, DecidedAt: 9000 * time.Millisecond,
+			Items: []executor.ReviewItem{
+				{JobID: 4, Decision: executor.DecisionHappened, Basis: 0},
+				{JobID: 5, Decision: executor.DecisionNotHappened, Basis: 0},
+			},
+		},
+	}
 	return cfg
 }
 

@@ -1,0 +1,221 @@
+{
+  "rounds": [
+    {
+      "round": {
+        "id": 1,
+        "operator": "alice",
+        "opened_at": 4300000000,
+        "decided_at": 4500000000,
+        "items": [
+          {
+            "job_id": 4,
+            "decision": "insufficient",
+            "basis": 0
+          },
+          {
+            "job_id": 5,
+            "decision": "not_happened",
+            "basis": 0
+          }
+        ]
+      },
+      "preview": {
+        "round_id": 1,
+        "operator": "alice",
+        "decided_at": 4500000000,
+        "applicable": [
+          {
+            "job_id": 4,
+            "decision": "insufficient",
+            "basis": 0
+          }
+        ],
+        "effects": [
+          {
+            "job_id": 4,
+            "decision": "insufficient",
+            "effect": "keep_waiting",
+            "detail": "材料仍不足：保持未知，替代实例继续待命，留待后续轮次核对"
+          }
+        ],
+        "conflicts": [
+          {
+            "round_id": 1,
+            "operator": "alice",
+            "job_id": 5,
+            "decision": "not_happened",
+            "given_basis": 0,
+            "reason": "任务当前不在失联待核对队列中"
+          }
+        ]
+      },
+      "accepted": [
+        {
+          "job_id": 4,
+          "decision": "insufficient",
+          "basis": 0
+        }
+      ]
+    },
+    {
+      "round": {
+        "id": 2,
+        "operator": "bob",
+        "opened_at": 8300000000,
+        "decided_at": 8600000000,
+        "items": [
+          {
+            "job_id": 4,
+            "decision": "not_happened",
+            "basis": 0
+          },
+          {
+            "job_id": 5,
+            "decision": "happened",
+            "basis": 0
+          }
+        ]
+      },
+      "preview": {
+        "round_id": 2,
+        "operator": "bob",
+        "decided_at": 8600000000,
+        "applicable": [
+          {
+            "job_id": 4,
+            "decision": "not_happened",
+            "basis": 0
+          },
+          {
+            "job_id": 5,
+            "decision": "happened",
+            "basis": 0
+          }
+        ],
+        "effects": [
+          {
+            "job_id": 4,
+            "decision": "not_happened",
+            "effect": "schedule_takeover",
+            "worker_id": 1,
+            "worker_class": "cpu",
+            "detail": "替代实例 1/cpu 已就绪，确认后立即接替执行剩余 505ms"
+          },
+          {
+            "job_id": 5,
+            "decision": "happened",
+            "effect": "release_capacity",
+            "worker_id": 2,
+            "worker_class": "cpu",
+            "detail": "确认旧结果有效：取消接替并释放待命替代实例 2/cpu，不重新执行任务"
+          }
+        ],
+        "conflicts": null
+      },
+      "accepted": [
+        {
+          "job_id": 4,
+          "decision": "not_happened",
+          "basis": 0
+        },
+        {
+          "job_id": 5,
+          "decision": "happened",
+          "basis": 0
+        }
+      ]
+    },
+    {
+      "round": {
+        "id": 3,
+        "operator": "alice",
+        "opened_at": 8700000000,
+        "decided_at": 9000000000,
+        "items": [
+          {
+            "job_id": 4,
+            "decision": "happened",
+            "basis": 0
+          },
+          {
+            "job_id": 5,
+            "decision": "not_happened",
+            "basis": 0
+          }
+        ]
+      },
+      "preview": {
+        "round_id": 3,
+        "operator": "alice",
+        "decided_at": 9000000000,
+        "applicable": null,
+        "effects": null,
+        "conflicts": [
+          {
+            "round_id": 3,
+            "operator": "alice",
+            "job_id": 4,
+            "decision": "happened",
+            "given_basis": 0,
+            "reason": "任务已在第 2 轮由 bob 确认为 not_happened（重新运行=true）；过期决定不得重新执行已确认的效果"
+          },
+          {
+            "round_id": 3,
+            "operator": "alice",
+            "job_id": 5,
+            "decision": "not_happened",
+            "given_basis": 0,
+            "reason": "任务已在第 2 轮由 bob 确认为 happened（重新运行=false）；过期决定不得重新执行已确认的效果"
+          }
+        ]
+      },
+      "accepted": null
+    }
+  ],
+  "takeovers": [
+    {
+      "job_id": 4,
+      "class": "gpu",
+      "round_id": 2,
+      "operator": "bob",
+      "confirmed_at": 8600000000,
+      "started_at": 8600000000,
+      "completed_at": 9105000000,
+      "remaining": 505000000,
+      "worker_id": 1,
+      "worker_class": "cpu",
+      "rerun": true,
+      "status": "completed"
+    },
+    {
+      "job_id": 5,
+      "class": "gpu",
+      "round_id": 2,
+      "operator": "bob",
+      "confirmed_at": 8600000000,
+      "remaining": 287000000,
+      "worker_id": 2,
+      "worker_class": "cpu",
+      "rerun": false,
+      "status": "confirmed_old_result"
+    }
+  ],
+  "resolved": [
+    {
+      "job_id": 4,
+      "decision": "not_happened",
+      "round_id": 2,
+      "operator": "bob",
+      "at": 8600000000,
+      "rerun": true
+    },
+    {
+      "job_id": 5,
+      "decision": "happened",
+      "round_id": 2,
+      "operator": "bob",
+      "at": 8600000000,
+      "rerun": false
+    }
+  ]
+}

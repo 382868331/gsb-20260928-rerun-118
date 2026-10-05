@@ -32,6 +32,7 @@ type Config struct {
 	Compatibility map[string][]string
 	Failures      []Failure
 	Confirmations []OutcomeConfirmation
+	ReviewRounds  []ReviewRound
 	Tick          time.Duration
 	Cooldown      time.Duration
 }
@@ -91,6 +92,9 @@ type unknownJob struct {
 	startedAt   time.Duration
 	remaining   time.Duration
 	replacement *worker
+	// basis 是该未知任务当前状态版本：替代实例就绪等状态推进时递增，
+	// 工作台据此拒绝依据旧版本作出的过期决定。
+	basis int64
 }
 
 type AuditEvent struct {
@@ -114,6 +118,9 @@ const (
 	AuditReserveStandby = "reserve_standby"
 	AuditConfirmEffect  = "confirm_effect"
 	AuditTakeover       = "takeover"
+	AuditReviewOpen     = "review_round"
+	AuditKeepWaiting    = "keep_waiting"
+	AuditReviewConflict = "review_conflict"
 )
 
 type eventKind int
@@ -125,6 +132,7 @@ const (
 	evTick
 	evLoseWorker
 	evConfirm
+	evReviewRound
 )
 
 type event struct {
@@ -169,6 +177,7 @@ type Result struct {
 	Logs     []decision.Log
 	Events   []AuditEvent
 	Unknown  []UnknownJob
+	Review   ReviewJournal
 	PerClass map[string]metrics.Counters
 	Total    metrics.Counters
 }
@@ -185,13 +194,19 @@ type Engine struct {
 	cfg      Config
 	strategy decision.Strategy
 
-	classes map[string]*classRuntime
-	order   []string
-	workers []*worker
-	logs    []decision.Log
-	audits  []AuditEvent
-	unknown []*unknownJob
-	nextJob int
+	classes       map[string]*classRuntime
+	order         []string
+	workers       []*worker
+	logs          []decision.Log
+	audits        []AuditEvent
+	unknown       []*unknownJob
+	resolved      []ResolvedOutcome
+	rounds        []RoundRecord
+	takeovers     []TakeoverRecord
+	takeoverByJob map[int]*TakeoverRecord
+	workbench     Workbench
+	nextJob       int
+	now           time.Duration
 
 	events eventHeap
 	seq    int
@@ -208,9 +223,10 @@ func New(cfg Config, strategy decision.Strategy) *Engine {
 		cfg.Cooldown = 3 * cfg.Tick
 	}
 	e := &Engine{
-		cfg:      cfg,
-		strategy: strategy,
-		classes:  map[string]*classRuntime{},
+		cfg:           cfg,
+		strategy:      strategy,
+		classes:       map[string]*classRuntime{},
+		takeoverByJob: map[int]*TakeoverRecord{},
 	}
 	for name, cc := range cfg.Classes {
 		if cc.Min < 1 {
@@ -283,6 +299,9 @@ func (e *Engine) Run(jobs []Job) (Result, error) {
 		}
 		e.schedule(event{at: confirmation.At, kind: evConfirm, jobID: confirmation.JobID, gen: gen})
 	}
+	for _, round := range e.cfg.ReviewRounds {
+		e.schedule(event{at: round.DecidedAt, kind: evReviewRound, jobID: round.ID})
+	}
 	e.schedule(event{at: e.cfg.Tick, kind: evTick})
 
 	endAt := time.Duration(0)
@@ -298,6 +317,7 @@ func (e *Engine) Run(jobs []Job) (Result, error) {
 
 	for e.events.Len() > 0 {
 		ev := heap.Pop(&e.events).(event)
+		e.now = ev.at
 		if ev.kind == evArrival && ev.at > endAt {
 			continue
 		}
@@ -317,6 +337,8 @@ func (e *Engine) Run(jobs []Job) (Result, error) {
 			e.handleLoseWorker(ev.at, ev.jobID)
 		case evConfirm:
 			e.handleConfirmation(ev.at, ev.jobID, ev.gen == 1)
+		case evReviewRound:
+			e.handleReviewRound(ev.at, ev.jobID)
 		}
 	}
 
@@ -331,6 +353,7 @@ func (e *Engine) Run(jobs []Job) (Result, error) {
 			At: item.failedAt, Remaining: item.remaining,
 		})
 	}
+	result.Review = ReviewJournal{Rounds: e.rounds, Takeovers: e.takeovers, Resolved: e.resolved}
 	if err := e.checkAccounting(); err != nil {
 		return result, err
 	}
@@ -404,6 +427,9 @@ func (e *Engine) handleReady(now time.Duration, id, gen int) {
 			// 替代实例就绪只是接替容量就绪：旧实例是否已停止、旧效果是否发生
 			// 都还没有人工确认，因此只记录就绪并继续待命，绝不重投未知任务。
 			w.standbyReady = true
+			if item := e.unknownByJob(w.jobID); item != nil && item.replacement == w {
+				item.basis++
+			}
 			e.audit(now, AuditReserveStandby, w.jobID, w.job, w, "替代实例启动完成进入待命；就绪不等于旧实例停止，继续等待人工确认")
 			return
 		}
@@ -412,6 +438,7 @@ func (e *Engine) handleReady(now time.Duration, id, gen int) {
 		w.standby = false
 		w.runOnReady = false
 		e.schedule(event{at: now + w.job.Service, kind: evComplete, ref: w.id, gen: w.gen, jobID: w.jobID, job: w.job})
+		e.markTakeoverStarted(w.jobID, now)
 		e.audit(now, AuditTakeover, w.jobID, w.job, w, "人工确认旧效果不存在；替代实例就绪后执行剩余任务")
 		return
 	}
@@ -441,6 +468,9 @@ func (e *Engine) handleComplete(now time.Duration, id, gen int) {
 		completionReason = "接替实例完成剩余任务，旧效果已由人工确认不存在"
 	}
 	e.audit(now, AuditComplete, w.jobID, w.job, w, completionReason)
+	if w.handoff {
+		e.markTakeoverCompleted(w.jobID, now)
+	}
 	w.jobID = 0
 	w.started = 0
 	if w.state == stateDraining {
@@ -521,14 +551,80 @@ func (e *Engine) handleLoseWorker(now time.Duration, jobID int) {
 }
 
 func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool) {
-	item := e.unknownByJob(jobID)
+	decision := DecisionNotHappened
+	if observed {
+		decision = DecisionHappened
+	}
+	// 兼容旧的单点确认配置：视为一轮只含一项的核对（无工作台冲突检测）。
+	e.resolveUnknown(now, e.unknownByJob(jobID), decision, 0, "legacy-confirmation")
+}
+
+// unknownTasks 生成工作台所需的失联任务快照。
+func (e *Engine) unknownTasks() []UnknownTask {
+	tasks := make([]UnknownTask, 0, len(e.unknown))
+	for _, item := range e.unknown {
+		task := UnknownTask{
+			JobID: item.id, Class: item.oldClass, Basis: item.basis,
+			FailedAt: item.failedAt, Remaining: item.remaining,
+		}
+		if item.replacement != nil {
+			task.ReplacementID = item.replacement.id
+			task.ReplacementClass = item.replacement.class
+			task.ReplacementReady = item.replacement.readyAt <= e.now
+		}
+		tasks = append(tasks, task)
+	}
+	sort.SliceStable(tasks, func(i, j int) bool { return tasks[i].JobID < tasks[j].JobID })
+	return tasks
+}
+
+// handleReviewRound 执行一轮分批人工核对：先用工作台预览冲突与效果，
+// 只接受仍适用的项；过期/重复决定列入冲突，绝不重新执行已确认效果。
+func (e *Engine) handleReviewRound(now time.Duration, roundID int) {
+	var round ReviewRound
+	for _, candidate := range e.cfg.ReviewRounds {
+		if candidate.ID == roundID {
+			round = candidate
+			break
+		}
+	}
+	if round.ID == 0 {
+		return
+	}
+	e.now = now
+	round.DecidedAt = now
+	preview := e.workbench.Preview(e.unknownTasks(), e.resolved, round)
+	e.audit(now, AuditReviewOpen, 0, Job{}, nil,
+		fmt.Sprintf("操作者 %s 提交第 %d 轮核对：共 %d 项，适用 %d 项，冲突 %d 项",
+			round.Operator, round.ID, len(round.Items), len(preview.Applicable), len(preview.Conflicts)))
+	for _, conflict := range preview.Conflicts {
+		e.audit(now, AuditReviewConflict, conflict.JobID, Job{}, nil, conflict.Reason)
+	}
+	e.rounds = append(e.rounds, RoundRecord{Round: round, Preview: preview, Accepted: append([]ReviewItem(nil), preview.Applicable...)})
+	for _, item := range preview.Applicable {
+		e.resolveUnknown(now, e.unknownByJob(item.JobID), item.Decision, round.ID, round.Operator)
+	}
+}
+
+// resolveUnknown 对一条已被接受的核对决定生效：记录轮次决定与实际接替，
+// happened 只确认旧结果，not_happened 安排替代实例重新运行，insufficient 保留等待。
+func (e *Engine) resolveUnknown(now time.Duration, item *unknownJob, decision ReviewDecision, roundID int, operator string) {
 	if item == nil {
 		// 重复或迟到的确认：同一未知任务只处理一次，不重复记账。
 		return
 	}
 	c := e.classes[item.oldClass]
 	replacement := item.replacement
-	if observed {
+	reRun := decision == DecisionNotHappened
+	record := &TakeoverRecord{
+		JobID: item.id, Class: item.job.Class, RoundID: roundID, Operator: operator,
+		ConfirmedAt: now, Remaining: item.remaining,
+	}
+	if replacement != nil {
+		record.WorkerID = replacement.id
+		record.WorkerClass = replacement.class
+	}
+	if decision == DecisionHappened {
 		// 人工确认旧效果已经产生：只把未知确认为完成结果，绝不执行剩余工作。
 		wait := item.startedAt - item.job.Arrival
 		if wait < 0 {
@@ -555,45 +651,64 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 			} else if replacement.state == stateReserved {
 				replacement.state = stateStarting
 			}
-			e.audit(now, AuditRelease, jobID, item.job, replacement, "操作者确认旧任务已生效；取消接替执行并释放替代实例")
+			e.audit(now, AuditRelease, item.id, item.job, replacement, "操作者确认旧任务已生效；取消接替执行并释放替代实例")
 		}
-		e.audit(now, AuditConfirmEffect, jobID, item.job, nil, "操作者确认旧效果已产生；只保留结果，不重复执行")
-	} else {
-		e.audit(now, AuditConfirmEffect, jobID, item.job, nil, "操作者确认旧效果不存在；允许接替执行剩余任务")
+		record.Status = TakeoverConfirmedOldResult
+		record.ReRun = false
+		e.audit(now, AuditConfirmEffect, item.id, item.job, nil, "操作者确认旧效果已产生；只保留结果，不重复执行")
+	} else if decision == DecisionNotHappened {
+		e.audit(now, AuditConfirmEffect, item.id, item.job, nil, "操作者确认旧效果不存在；允许接替执行剩余任务")
 		if replacement == nil {
 			replacement = e.chooseReplacement(now, item.job, item.oldClass)
 			item.replacement = replacement
+			if replacement != nil {
+				record.WorkerID = replacement.id
+				record.WorkerClass = replacement.class
+			}
 		}
 		if replacement == nil {
 			c.counters.Unknown--
 			c.counters.Rejected++
-			e.audit(now, AuditReject, jobID, item.job, nil, "确认需要接替但无预声明兼容容量")
+			e.audit(now, AuditReject, item.id, item.job, nil, "确认需要接替但无预声明兼容容量")
 		} else {
 			c.counters.Unknown--
 			c.inflight++
 			remaining := item.remaining
 			runJob := item.job
 			runJob.Service = remaining
-			replacement.jobID = jobID
+			replacement.jobID = item.id
 			replacement.job = runJob
 			replacement.started = now
 			replacement.standbyReady = false
 			ready := replacement.readyAt <= now
+			record.Status = TakeoverRunning
+			record.ReRun = true
+			record.StartedAt = now
 			if ready {
 				replacement.state = stateBusy
 				replacement.standby = false
 				replacement.runOnReady = false
-				e.schedule(event{at: now + remaining, kind: evComplete, ref: replacement.id, gen: replacement.gen, jobID: jobID, job: runJob})
-				e.audit(now, AuditTakeover, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例已就绪，执行剩余任务")
+				e.schedule(event{at: now + remaining, kind: evComplete, ref: replacement.id, gen: replacement.gen, jobID: item.id, job: runJob})
+				e.audit(now, AuditTakeover, item.id, item.job, replacement, "人工确认旧效果不存在；替代实例已就绪，执行剩余任务")
 			} else {
 				// 替代实例仍在启动：继续待命，就绪后由 handleReady 接替执行。
 				replacement.state = stateReserved
 				replacement.standby = true
 				replacement.runOnReady = true
-				e.audit(now, AuditReserveStandby, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例仍在途，就绪后执行剩余任务")
+				e.audit(now, AuditReserveStandby, item.id, item.job, replacement, "人工确认旧效果不存在；替代实例仍在途，就绪后执行剩余任务")
 			}
 		}
+	} else {
+		// 材料仍不足：保持未知，替代实例继续待命，不计入已解决、不产生接替记录。
+		e.audit(now, AuditKeepWaiting, item.id, item.job, replacement, "材料仍不足；保留未知并继续等待后续轮次核对，不执行任何效果")
+		return
 	}
+	e.takeovers = append(e.takeovers, *record)
+	e.takeoverByJob[item.id] = record
+	e.resolved = append(e.resolved, ResolvedOutcome{
+		JobID: item.id, Decision: decision, RoundID: roundID, Operator: operator,
+		At: now, ReRun: reRun,
+	})
 	old := e.workerByID(item.oldWorker, item.oldGen)
 	e.removeUnknown(item)
 	e.removeWorker(old)
@@ -833,6 +948,40 @@ func (e *Engine) unknownByJob(jobID int) *unknownJob {
 		}
 	}
 	return nil
+}
+
+// markTakeoverStarted 在替代实例真正开始执行剩余工作时补记实际开始时点；
+// 若确认时替代实例仍在途启动，确认时点不等于重新运行时点。
+func (e *Engine) markTakeoverStarted(jobID int, now time.Duration) {
+	record := e.takeoverByJob[jobID]
+	if record == nil {
+		return
+	}
+	record.StartedAt = now
+	record.Status = TakeoverRunning
+	e.copyTakeover(record)
+}
+
+// markTakeoverCompleted 在替代实例确已完成接替执行时记录完成时点，
+// 使恢复后能区分“确已重新运行”与“只是确认了旧结果”。
+func (e *Engine) markTakeoverCompleted(jobID int, now time.Duration) {
+	record := e.takeoverByJob[jobID]
+	if record == nil {
+		return
+	}
+	record.CompletedAt = now
+	record.Status = TakeoverCompleted
+	e.copyTakeover(record)
+}
+
+// copyTakeover 把指针上的更新同步回 takeovers 快照切片。
+func (e *Engine) copyTakeover(record *TakeoverRecord) {
+	for i := range e.takeovers {
+		if e.takeovers[i].JobID == record.JobID && e.takeovers[i].RoundID == record.RoundID {
+			e.takeovers[i] = *record
+			return
+		}
+	}
 }
 
 func (e *Engine) removeUnknown(target *unknownJob) {

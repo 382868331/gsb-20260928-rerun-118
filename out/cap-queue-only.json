@@ -1397,6 +1397,11 @@
     }
   ],
   "unknown": null,
+  "review": {
+    "rounds": null,
+    "takeovers": null,
+    "resolved": null
+  },
   "per_class": {
     "cpu": {
       "Submitted": 24,

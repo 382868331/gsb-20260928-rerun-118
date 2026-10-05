@@ -16,15 +16,18 @@ import (
 
 // replayRecord 是落盘的决策依据：同一流量、同一配置下某策略的完整决策轨迹与账目。
 type replayRecord struct {
-	Scenario string                      `json:"scenario"`
-	Strategy string                      `json:"strategy"`
-	Seed     int64                       `json:"seed"`
-	Jobs     int                         `json:"jobs"`
-	Logs     []decision.Log              `json:"logs"`
-	Events   []executor.AuditEvent       `json:"events"`
-	Unknown  []executor.UnknownJob       `json:"unknown"`
-	PerClass map[string]metrics.Counters `json:"per_class"`
-	Total    metrics.Counters            `json:"total"`
+	Scenario    string                       `json:"scenario"`
+	Strategy    string                       `json:"strategy"`
+	Seed        int64                        `json:"seed"`
+	Jobs        int                          `json:"jobs"`
+	Logs        []decision.Log               `json:"logs"`
+	Events      []executor.AuditEvent        `json:"events"`
+	Unknown     []executor.UnknownJob        `json:"unknown"`
+	Rounds      []executor.ReviewRoundRecord `json:"review_rounds"`
+	Resolutions []executor.ReviewResolution  `json:"review_resolutions"`
+	Takeovers   []executor.TakeoverRecord    `json:"actual_takeovers"`
+	PerClass    map[string]metrics.Counters  `json:"per_class"`
+	Total       metrics.Counters             `json:"total"`
 }
 
 func main() {
@@ -70,6 +73,7 @@ func main() {
 			record := replayRecord{
 				Scenario: scenarioName, Strategy: strategyName, Seed: *seed,
 				Jobs: len(jobs), Logs: result.Logs, Events: result.Events, Unknown: result.Unknown,
+				Rounds: result.ReviewRounds, Resolutions: result.Resolutions, Takeovers: result.Takeovers,
 				PerClass: result.PerClass, Total: result.Total,
 			}
 			path := filepath.Join(*outDir, scenarioName+"-"+strategyName+".json")
@@ -111,7 +115,14 @@ func handoffConfigs(scenario string) executor.Config {
 	cfg.Classes["gpu"] = gpu
 	cfg.Compatibility = map[string][]string{"gpu": {"gpu", "cpu"}}
 	cfg.Failures = []executor.Failure{{At: 4200 * time.Millisecond, JobID: 4}}
-	cfg.Confirmations = []executor.OutcomeConfirmation{{At: 4400 * time.Millisecond, JobID: 4}}
+	cfg.ReviewRounds = []executor.ReviewRound{{
+		ID:       "handoff-manual-review",
+		At:       4400 * time.Millisecond,
+		Operator: "operator-a",
+		Decisions: []executor.ReviewDecision{{
+			JobID: 4, Outcome: executor.ReviewNotOccurred, BaseVersion: 0,
+		}},
+	}}
 	return cfg
 }
 

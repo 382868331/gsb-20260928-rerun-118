@@ -360,3 +360,100 @@ func TestDuplicateConfirmationIsIdempotent(t *testing.T) {
 		t.Fatalf("确认审计=%d，只应处理一次", confirms)
 	}
 }
+
+func TestReviewRoundPreviewsConflictsAndPersistsTakeovers(t *testing.T) {
+	cfg := handoffConfig()
+	gpu := cfg.Classes["gpu"]
+	gpu.Min = 2
+	gpu.Max = 2
+	cfg.Classes["gpu"] = gpu
+	cpu := cfg.Classes["cpu"]
+	cpu.StartupDelay = 2 * time.Second
+	cfg.Classes["cpu"] = cpu
+	cfg.Failures = []Failure{
+		{At: 1500 * time.Millisecond, JobID: 1},
+		{At: 1500 * time.Millisecond, JobID: 2},
+	}
+	cfg.ReviewRounds = []ReviewRound{
+		{
+			ID: "round-a", At: 1600 * time.Millisecond, Operator: "alice",
+			Decisions: []ReviewDecision{
+				{JobID: 1, Outcome: ReviewInsufficient, BaseVersion: 0},
+				{JobID: 2, Outcome: ReviewNotOccurred, BaseVersion: 0},
+			},
+		},
+		{
+			ID: "round-b", At: 1700 * time.Millisecond, Operator: "bob",
+			Decisions: []ReviewDecision{
+				{JobID: 1, Outcome: ReviewOccurred, BaseVersion: 0},
+			},
+		},
+		{
+			ID: "round-c", At: 1800 * time.Millisecond, Operator: "bob",
+			Decisions: []ReviewDecision{
+				{JobID: 1, Outcome: ReviewOccurred, BaseVersion: 1},
+			},
+		},
+	}
+	engine := New(cfg, decision.NewQueueRateStrategy())
+	jobs := []Job{
+		{Arrival: 0, Service: 2 * time.Second, Class: "gpu"},
+		{Arrival: 0, Service: 2 * time.Second, Class: "gpu"},
+		{Arrival: 0, Service: 100 * time.Millisecond, Class: "gpu"},
+	}
+
+	result, err := engine.Run(jobs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.ReviewRounds) != 3 {
+		t.Fatalf("review rounds = %d, want 3", len(result.ReviewRounds))
+	}
+	first := result.ReviewRounds[0]
+	if len(first.Preview.Waiting) != 1 || first.Preview.Waiting[0].JobID != 1 {
+		t.Fatalf("first round waiting preview = %+v", first.Preview.Waiting)
+	}
+	if len(first.Preview.Takeovers) != 1 || first.Preview.Takeovers[0].JobID != 2 || first.Preview.Takeovers[0].Ready {
+		t.Fatalf("first round takeover preview = %+v", first.Preview.Takeovers)
+	}
+	if len(first.Preview.Releases) != 0 {
+		t.Fatalf("insufficient material should not release capacity: %+v", first.Preview.Releases)
+	}
+
+	stale := result.ReviewRounds[1].Decisions[0]
+	if stale.Accepted || stale.Status != ReviewStatusConflicted || stale.CurrentVersion != 1 {
+		t.Fatalf("stale decision = %+v, want conflict at version 1", stale)
+	}
+	final := result.ReviewRounds[2].Decisions[0]
+	if !final.Accepted || len(result.ReviewRounds[2].Preview.Releases) != 1 {
+		t.Fatalf("current-version decision = %+v preview=%+v", final, result.ReviewRounds[2].Preview)
+	}
+	if len(result.Takeovers) != 1 || result.Takeovers[0].JobID != 2 || result.Takeovers[0].RoundID != "round-a" {
+		t.Fatalf("actual takeovers = %+v, want only job 2", result.Takeovers)
+	}
+	if result.Takeovers[0].At < 2*time.Second {
+		t.Fatalf("takeover recorded at plan time %s; want actual startup time", result.Takeovers[0].At)
+	}
+	if len(result.Resolutions) != 3 {
+		t.Fatalf("resolutions = %+v, want insufficient, replay and old-result confirmation", result.Resolutions)
+	}
+	replayed := map[int]bool{}
+	for _, resolution := range result.Resolutions {
+		replayed[resolution.JobID] = resolution.Replayed
+	}
+	if !replayed[2] || replayed[1] {
+		t.Fatalf("replayed flags = %+v, want only job 2 rerun", replayed)
+	}
+	if got := auditKinds(result.Events, 1); containsString(got, AuditTakeover) {
+		t.Fatalf("job 1 confirmed old result but was executed again: %v", got)
+	}
+}
+
+func containsString(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}

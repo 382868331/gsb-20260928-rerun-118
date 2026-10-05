@@ -32,6 +32,7 @@ type Config struct {
 	Compatibility map[string][]string
 	Failures      []Failure
 	Confirmations []OutcomeConfirmation
+	ReviewRounds  []ReviewRound
 	Tick          time.Duration
 	Cooldown      time.Duration
 }
@@ -45,6 +46,96 @@ type OutcomeConfirmation struct {
 	At             time.Duration
 	JobID          int
 	EffectObserved bool
+}
+
+type ReviewOutcome string
+
+const (
+	ReviewOccurred     ReviewOutcome = "occurred"
+	ReviewNotOccurred  ReviewOutcome = "not_occurred"
+	ReviewInsufficient ReviewOutcome = "insufficient_material"
+)
+
+type ReviewStatus string
+
+const (
+	ReviewStatusPending    ReviewStatus = "pending"
+	ReviewStatusWaiting    ReviewStatus = "waiting_material"
+	ReviewStatusResolved   ReviewStatus = "resolved"
+	ReviewStatusConflicted ReviewStatus = "conflicted"
+)
+
+type ReviewDecision struct {
+	JobID       int           `json:"job_id"`
+	Outcome     ReviewOutcome `json:"outcome"`
+	BaseVersion int64         `json:"base_version"`
+}
+
+type ReviewRound struct {
+	ID        string           `json:"id"`
+	At        time.Duration    `json:"at"`
+	Operator  string           `json:"operator"`
+	Decisions []ReviewDecision `json:"decisions"`
+}
+
+type ReviewCapacityPlan struct {
+	JobID       int    `json:"job_id"`
+	WorkerID    int    `json:"worker_id"`
+	WorkerClass string `json:"worker_class"`
+}
+
+type ReviewTakeoverPlan struct {
+	JobID       int           `json:"job_id"`
+	WorkerID    int           `json:"worker_id"`
+	WorkerClass string        `json:"worker_class"`
+	Ready       bool          `json:"ready"`
+	StartsAt    time.Duration `json:"starts_at"`
+	Remaining   time.Duration `json:"remaining"`
+}
+
+type ReviewWaitPlan struct {
+	JobID   int    `json:"job_id"`
+	Version int64  `json:"version"`
+	Reason  string `json:"reason"`
+}
+
+type ReviewPreview struct {
+	Releases  []ReviewCapacityPlan `json:"releases"`
+	Takeovers []ReviewTakeoverPlan `json:"takeovers"`
+	Waiting   []ReviewWaitPlan     `json:"waiting"`
+}
+
+type ReviewDecisionRecord struct {
+	ReviewDecision
+	Accepted       bool         `json:"accepted"`
+	CurrentVersion int64        `json:"current_version"`
+	Status         ReviewStatus `json:"status"`
+	ConflictReason string       `json:"conflict_reason,omitempty"`
+}
+
+type ReviewRoundRecord struct {
+	ReviewRound
+	Version   int64                  `json:"version"`
+	Decisions []ReviewDecisionRecord `json:"decisions"`
+	Preview   ReviewPreview          `json:"preview"`
+}
+
+type ReviewResolution struct {
+	At       time.Duration `json:"at"`
+	RoundID  string        `json:"round_id"`
+	Operator string        `json:"operator"`
+	JobID    int           `json:"job_id"`
+	Outcome  ReviewOutcome `json:"outcome"`
+	Replayed bool          `json:"replayed"`
+}
+
+type TakeoverRecord struct {
+	At          time.Duration `json:"at"`
+	RoundID     string        `json:"round_id"`
+	JobID       int           `json:"job_id"`
+	WorkerID    int           `json:"worker_id"`
+	WorkerClass string        `json:"worker_class"`
+	Remaining   time.Duration `json:"remaining"`
 }
 
 type workerState int
@@ -74,6 +165,8 @@ type worker struct {
 	standbyReady bool
 	// runOnReady 表示人工已确认旧效果不存在：替代实例一就绪就执行剩余任务。
 	runOnReady bool
+	roundID    string
+	operator   string
 }
 
 type queuedJob struct {
@@ -96,6 +189,7 @@ type unknownJob struct {
 type AuditEvent struct {
 	At          time.Duration
 	Kind        string
+	RoundID     string `json:"RoundID,omitempty"`
 	JobID       int
 	JobClass    string
 	WorkerID    int
@@ -114,6 +208,9 @@ const (
 	AuditReserveStandby = "reserve_standby"
 	AuditConfirmEffect  = "confirm_effect"
 	AuditTakeover       = "takeover"
+	AuditReviewRound    = "review_round"
+	AuditReviewConflict = "review_conflict"
+	AuditKeepWaiting    = "keep_waiting"
 )
 
 type eventKind int
@@ -125,6 +222,7 @@ const (
 	evTick
 	evLoseWorker
 	evConfirm
+	evReviewRound
 )
 
 type event struct {
@@ -134,6 +232,7 @@ type event struct {
 	ref   int
 	gen   int
 	jobID int
+	round int
 	job   Job
 }
 
@@ -166,11 +265,14 @@ type classRuntime struct {
 
 // Result 是一次重放的完整产出：决策依据、分类别账目与总账。
 type Result struct {
-	Logs     []decision.Log
-	Events   []AuditEvent
-	Unknown  []UnknownJob
-	PerClass map[string]metrics.Counters
-	Total    metrics.Counters
+	Logs         []decision.Log
+	Events       []AuditEvent
+	Unknown      []UnknownJob
+	ReviewRounds []ReviewRoundRecord
+	Resolutions  []ReviewResolution
+	Takeovers    []TakeoverRecord
+	PerClass     map[string]metrics.Counters
+	Total        metrics.Counters
 }
 
 type UnknownJob struct {
@@ -185,13 +287,19 @@ type Engine struct {
 	cfg      Config
 	strategy decision.Strategy
 
-	classes map[string]*classRuntime
-	order   []string
-	workers []*worker
-	logs    []decision.Log
-	audits  []AuditEvent
-	unknown []*unknownJob
-	nextJob int
+	classes        map[string]*classRuntime
+	order          []string
+	workers        []*worker
+	logs           []decision.Log
+	audits         []AuditEvent
+	unknown        []*unknownJob
+	nextJob        int
+	reviewVersions map[int]int64
+	reviewStatus   map[int]ReviewStatus
+	reviewRounds   []ReviewRoundRecord
+	resolutions    []ReviewResolution
+	takeovers      []TakeoverRecord
+	roundVersion   int64
 
 	events eventHeap
 	seq    int
@@ -208,9 +316,11 @@ func New(cfg Config, strategy decision.Strategy) *Engine {
 		cfg.Cooldown = 3 * cfg.Tick
 	}
 	e := &Engine{
-		cfg:      cfg,
-		strategy: strategy,
-		classes:  map[string]*classRuntime{},
+		cfg:            cfg,
+		strategy:       strategy,
+		classes:        map[string]*classRuntime{},
+		reviewVersions: map[int]int64{},
+		reviewStatus:   map[int]ReviewStatus{},
 	}
 	for name, cc := range cfg.Classes {
 		if cc.Min < 1 {
@@ -283,6 +393,9 @@ func (e *Engine) Run(jobs []Job) (Result, error) {
 		}
 		e.schedule(event{at: confirmation.At, kind: evConfirm, jobID: confirmation.JobID, gen: gen})
 	}
+	for i, round := range e.cfg.ReviewRounds {
+		e.schedule(event{at: round.At, kind: evReviewRound, round: i})
+	}
 	e.schedule(event{at: e.cfg.Tick, kind: evTick})
 
 	endAt := time.Duration(0)
@@ -317,10 +430,27 @@ func (e *Engine) Run(jobs []Job) (Result, error) {
 			e.handleLoseWorker(ev.at, ev.jobID)
 		case evConfirm:
 			e.handleConfirmation(ev.at, ev.jobID, ev.gen == 1)
+		case evReviewRound:
+			if ev.round >= 0 && ev.round < len(e.cfg.ReviewRounds) {
+				e.SubmitReviewRound(ev.at, e.cfg.ReviewRounds[ev.round])
+			}
 		}
 	}
 
-	result := Result{Logs: e.logs, Events: e.audits, PerClass: map[string]metrics.Counters{}}
+	result := Result{
+		Logs: e.logs, Events: e.audits,
+		ReviewRounds: e.reviewRounds, Resolutions: e.resolutions, Takeovers: e.takeovers,
+		PerClass: map[string]metrics.Counters{},
+	}
+	if result.ReviewRounds == nil {
+		result.ReviewRounds = []ReviewRoundRecord{}
+	}
+	if result.Resolutions == nil {
+		result.Resolutions = []ReviewResolution{}
+	}
+	if result.Takeovers == nil {
+		result.Takeovers = []TakeoverRecord{}
+	}
 	for _, name := range e.order {
 		result.PerClass[name] = e.classes[name].counters
 		result.Total.Add(e.classes[name].counters)
@@ -412,7 +542,13 @@ func (e *Engine) handleReady(now time.Duration, id, gen int) {
 		w.standby = false
 		w.runOnReady = false
 		e.schedule(event{at: now + w.job.Service, kind: evComplete, ref: w.id, gen: w.gen, jobID: w.jobID, job: w.job})
-		e.audit(now, AuditTakeover, w.jobID, w.job, w, "人工确认旧效果不存在；替代实例就绪后执行剩余任务")
+		e.recordTakeover(now, w)
+		e.auditRound(now, AuditTakeover, w.roundID, w.jobID, w.job, w, "人工确认旧效果不存在；替代实例就绪后执行剩余任务")
+		for i := range e.resolutions {
+			if e.resolutions[i].RoundID == w.roundID && e.resolutions[i].JobID == w.jobID {
+				e.resolutions[i].Replayed = true
+			}
+		}
 		return
 	}
 	w.state = stateIdle
@@ -488,6 +624,8 @@ func (e *Engine) handleLoseWorker(now time.Duration, jobID int) {
 		failedAt: now, startedAt: w.started, remaining: remaining,
 	}
 	e.unknown = append(e.unknown, item)
+	e.reviewVersions[jobID] = 0
+	e.reviewStatus[jobID] = ReviewStatusPending
 	e.classes[oldClass].counters.RecordUnknown()
 	e.audit(now, AuditLoseWorker, jobID, job, w, "工作者失联：旧实例不再接收队列，但失联不等于已停止")
 	e.audit(now, AuditMarkUnknown, jobID, job, w, "任务可能已经产生外部效果；在人工确认前不自动重放、不计完成")
@@ -521,14 +659,202 @@ func (e *Engine) handleLoseWorker(now time.Duration, jobID int) {
 }
 
 func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool) {
+	outcome := ReviewNotOccurred
+	if observed {
+		outcome = ReviewOccurred
+	}
+	e.resolveUnknown(now, jobID, outcome, "legacy-confirmation", "system")
+}
+
+func (e *Engine) SubmitReviewRound(now time.Duration, round ReviewRound) ReviewRoundRecord {
+	e.roundVersion++
+	record := ReviewRoundRecord{
+		ReviewRound: round,
+		Version:     e.roundVersion,
+	}
+	if round.ID == "" {
+		round.ID = fmt.Sprintf("round-%d", len(e.reviewRounds)+1)
+		record.ReviewRound.ID = round.ID
+	}
+	touched := map[int]bool{}
+	for _, decision := range round.Decisions {
+		item := e.unknownByJob(decision.JobID)
+		entry := ReviewDecisionRecord{
+			ReviewDecision: decision,
+			Status:         ReviewStatusConflicted,
+		}
+		if item == nil {
+			entry.ConflictReason = "任务已不在未知队列：终局决定已经生效，过期决定不能重复执行"
+			entry.Status = e.reviewStatus[decision.JobID]
+			if entry.Status == "" {
+				entry.Status = ReviewStatusConflicted
+			}
+			e.auditRound(now, AuditReviewConflict, round.ID, decision.JobID, Job{}, nil, entry.ConflictReason)
+			record.Decisions = append(record.Decisions, entry)
+			continue
+		}
+		entry.CurrentVersion = e.reviewVersions[decision.JobID]
+		currentVersion := entry.CurrentVersion
+		if touched[decision.JobID] {
+			currentVersion++
+		}
+		entry.CurrentVersion = currentVersion
+		if decision.BaseVersion != currentVersion {
+			entry.ConflictReason = fmt.Sprintf("决定基于版本 %d，当前版本为 %d", decision.BaseVersion, entry.CurrentVersion)
+			e.auditRound(now, AuditReviewConflict, round.ID, decision.JobID, item.job, item.replacement, entry.ConflictReason)
+			record.Decisions = append(record.Decisions, entry)
+			continue
+		}
+		switch decision.Outcome {
+		case ReviewOccurred, ReviewNotOccurred, ReviewInsufficient:
+		default:
+			entry.ConflictReason = fmt.Sprintf("未知核对结果 %q", decision.Outcome)
+			e.auditRound(now, AuditReviewConflict, round.ID, decision.JobID, item.job, item.replacement, entry.ConflictReason)
+			record.Decisions = append(record.Decisions, entry)
+			continue
+		}
+
+		entry.Accepted = true
+		entry.Status = ReviewStatusWaiting
+		willReplay := decision.Outcome == ReviewNotOccurred && item.replacement != nil
+		preview := e.previewDecision(now, decision, item, currentVersion+1)
+		record.Preview.Releases = append(record.Preview.Releases, preview.Releases...)
+		record.Preview.Takeovers = append(record.Preview.Takeovers, preview.Takeovers...)
+		record.Preview.Waiting = append(record.Preview.Waiting, preview.Waiting...)
+
+		e.reviewVersions[decision.JobID] = currentVersion + 1
+		touched[decision.JobID] = true
+		if decision.Outcome == ReviewInsufficient {
+			e.reviewStatus[decision.JobID] = ReviewStatusWaiting
+			e.auditRound(now, AuditKeepWaiting, round.ID, decision.JobID, item.job, item.replacement, "材料仍不足：保留未知状态与待命容量，等待补充材料")
+		} else {
+			e.reviewStatus[decision.JobID] = ReviewStatusResolved
+			resolved := e.resolveUnknown(now, decision.JobID, decision.Outcome, round.ID, round.Operator)
+			if !resolved {
+				entry.Accepted = false
+				entry.Status = ReviewStatusConflicted
+				entry.ConflictReason = "当前运行态已无法应用该决定"
+			} else {
+				entry.Status = ReviewStatusResolved
+			}
+		}
+		if entry.Accepted {
+			e.resolutions = append(e.resolutions, ReviewResolution{
+				At: now, RoundID: round.ID, Operator: round.Operator,
+				JobID: decision.JobID, Outcome: decision.Outcome,
+				Replayed: willReplay,
+			})
+		}
+		record.Decisions = append(record.Decisions, entry)
+	}
+	e.reviewRounds = append(e.reviewRounds, record)
+	e.auditRound(now, AuditReviewRound, round.ID, 0, Job{}, nil, fmt.Sprintf("保存人工核对轮次：接受 %d 项，冲突 %d 项", countAccepted(record.Decisions), countConflicts(record.Decisions)))
+	return record
+}
+
+func (e *Engine) PreviewReviewRound(now time.Duration, round ReviewRound) ReviewRoundRecord {
+	record := ReviewRoundRecord{
+		ReviewRound: round,
+		Version:     e.roundVersion + 1,
+	}
+	if record.ReviewRound.ID == "" {
+		record.ReviewRound.ID = fmt.Sprintf("round-%d", len(e.reviewRounds)+1)
+	}
+	versions := map[int]int64{}
+	for _, decision := range round.Decisions {
+		item := e.unknownByJob(decision.JobID)
+		entry := ReviewDecisionRecord{ReviewDecision: decision, Status: ReviewStatusConflicted}
+		if item == nil {
+			entry.ConflictReason = "任务已不在未知队列：终局决定已经生效，过期决定不能重复执行"
+			entry.Status = e.reviewStatus[decision.JobID]
+			if entry.Status == "" {
+				entry.Status = ReviewStatusConflicted
+			}
+			record.Decisions = append(record.Decisions, entry)
+			continue
+		}
+		entry.CurrentVersion = e.reviewVersions[decision.JobID] + versions[decision.JobID]
+		if decision.BaseVersion != entry.CurrentVersion {
+			entry.ConflictReason = fmt.Sprintf("决定基于版本 %d，当前版本为 %d", decision.BaseVersion, entry.CurrentVersion)
+			record.Decisions = append(record.Decisions, entry)
+			continue
+		}
+		switch decision.Outcome {
+		case ReviewOccurred, ReviewNotOccurred, ReviewInsufficient:
+		default:
+			entry.ConflictReason = fmt.Sprintf("未知核对结果 %q", decision.Outcome)
+			record.Decisions = append(record.Decisions, entry)
+			continue
+		}
+		entry.Accepted = true
+		entry.Status = ReviewStatusWaiting
+		preview := e.previewDecision(now, decision, item, entry.CurrentVersion+1)
+		record.Preview.Releases = append(record.Preview.Releases, preview.Releases...)
+		record.Preview.Takeovers = append(record.Preview.Takeovers, preview.Takeovers...)
+		record.Preview.Waiting = append(record.Preview.Waiting, preview.Waiting...)
+		versions[decision.JobID]++
+		record.Decisions = append(record.Decisions, entry)
+	}
+	return record
+}
+
+func (e *Engine) previewDecision(now time.Duration, decision ReviewDecision, item *unknownJob, version int64) ReviewPreview {
+	var preview ReviewPreview
+	switch decision.Outcome {
+	case ReviewOccurred:
+		if item.replacement != nil {
+			preview.Releases = append(preview.Releases, ReviewCapacityPlan{
+				JobID: item.id, WorkerID: item.replacement.id, WorkerClass: item.replacement.class,
+			})
+		}
+	case ReviewNotOccurred:
+		if item.replacement != nil {
+			ready := item.replacement.readyAt <= now
+			startsAt := item.replacement.readyAt
+			if ready {
+				startsAt = now
+			}
+			preview.Takeovers = append(preview.Takeovers, ReviewTakeoverPlan{
+				JobID: item.id, WorkerID: item.replacement.id, WorkerClass: item.replacement.class,
+				Ready: ready, StartsAt: startsAt, Remaining: item.remaining,
+			})
+		}
+	case ReviewInsufficient:
+		preview.Waiting = append(preview.Waiting, ReviewWaitPlan{
+			JobID: item.id, Version: version, Reason: "材料仍不足，继续保留未知任务和待命容量",
+		})
+	}
+	return preview
+}
+
+func countAccepted(entries []ReviewDecisionRecord) int {
+	total := 0
+	for _, entry := range entries {
+		if entry.Accepted {
+			total++
+		}
+	}
+	return total
+}
+
+func countConflicts(entries []ReviewDecisionRecord) int {
+	total := 0
+	for _, entry := range entries {
+		if !entry.Accepted {
+			total++
+		}
+	}
+	return total
+}
+
+func (e *Engine) resolveUnknown(now time.Duration, jobID int, outcome ReviewOutcome, roundID, operator string) bool {
 	item := e.unknownByJob(jobID)
 	if item == nil {
-		// 重复或迟到的确认：同一未知任务只处理一次，不重复记账。
-		return
+		return false
 	}
 	c := e.classes[item.oldClass]
 	replacement := item.replacement
-	if observed {
+	if outcome == ReviewOccurred {
 		// 人工确认旧效果已经产生：只把未知确认为完成结果，绝不执行剩余工作。
 		wait := item.startedAt - item.job.Arrival
 		if wait < 0 {
@@ -555,11 +881,13 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 			} else if replacement.state == stateReserved {
 				replacement.state = stateStarting
 			}
-			e.audit(now, AuditRelease, jobID, item.job, replacement, "操作者确认旧任务已生效；取消接替执行并释放替代实例")
+			replacement.roundID = roundID
+			replacement.operator = operator
+			e.auditRound(now, AuditRelease, roundID, jobID, item.job, replacement, "操作者确认旧任务已生效；取消接替执行并释放替代实例")
 		}
-		e.audit(now, AuditConfirmEffect, jobID, item.job, nil, "操作者确认旧效果已产生；只保留结果，不重复执行")
+		e.auditRound(now, AuditConfirmEffect, roundID, jobID, item.job, nil, "操作者确认旧效果已产生；只保留结果，不重复执行")
 	} else {
-		e.audit(now, AuditConfirmEffect, jobID, item.job, nil, "操作者确认旧效果不存在；允许接替执行剩余任务")
+		e.auditRound(now, AuditConfirmEffect, roundID, jobID, item.job, nil, "操作者确认旧效果不存在；允许接替执行剩余任务")
 		if replacement == nil {
 			replacement = e.chooseReplacement(now, item.job, item.oldClass)
 			item.replacement = replacement
@@ -567,7 +895,7 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 		if replacement == nil {
 			c.counters.Unknown--
 			c.counters.Rejected++
-			e.audit(now, AuditReject, jobID, item.job, nil, "确认需要接替但无预声明兼容容量")
+			e.auditRound(now, AuditReject, roundID, jobID, item.job, nil, "确认需要接替但无预声明兼容容量")
 		} else {
 			c.counters.Unknown--
 			c.inflight++
@@ -577,6 +905,8 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 			replacement.jobID = jobID
 			replacement.job = runJob
 			replacement.started = now
+			replacement.roundID = roundID
+			replacement.operator = operator
 			replacement.standbyReady = false
 			ready := replacement.readyAt <= now
 			if ready {
@@ -584,13 +914,14 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 				replacement.standby = false
 				replacement.runOnReady = false
 				e.schedule(event{at: now + remaining, kind: evComplete, ref: replacement.id, gen: replacement.gen, jobID: jobID, job: runJob})
-				e.audit(now, AuditTakeover, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例已就绪，执行剩余任务")
+				e.recordTakeover(now, replacement)
+				e.auditRound(now, AuditTakeover, roundID, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例已就绪，执行剩余任务")
 			} else {
 				// 替代实例仍在启动：继续待命，就绪后由 handleReady 接替执行。
 				replacement.state = stateReserved
 				replacement.standby = true
 				replacement.runOnReady = true
-				e.audit(now, AuditReserveStandby, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例仍在途，就绪后执行剩余任务")
+				e.auditRound(now, AuditReserveStandby, roundID, jobID, item.job, replacement, "人工确认旧效果不存在；替代实例仍在途，就绪后执行剩余任务")
 			}
 		}
 	}
@@ -598,6 +929,7 @@ func (e *Engine) handleConfirmation(now time.Duration, jobID int, observed bool)
 	e.removeUnknown(item)
 	e.removeWorker(old)
 	e.dispatch(now, item.oldClass)
+	return true
 }
 
 func (e *Engine) chooseReplacement(now time.Duration, job Job, oldClass string) *worker {
@@ -859,12 +1191,32 @@ func (e *Engine) bestIdleOrStarting(class string) *worker {
 }
 
 func (e *Engine) audit(now time.Duration, kind string, jobID int, job Job, w *worker, reason string) {
+	e.auditRound(now, kind, "", jobID, job, w, reason)
+}
+
+func (e *Engine) auditRound(now time.Duration, kind, roundID string, jobID int, job Job, w *worker, reason string) {
 	event := AuditEvent{At: now, Kind: kind, JobID: jobID, JobClass: job.Class, Reason: reason}
+	event.RoundID = roundID
 	if w != nil {
 		event.WorkerID = w.id
 		event.WorkerClass = w.class
 	}
 	e.audits = append(e.audits, event)
+}
+
+func (e *Engine) recordTakeover(now time.Duration, w *worker) {
+	if w == nil {
+		return
+	}
+	for _, record := range e.takeovers {
+		if record.RoundID == w.roundID && record.JobID == w.jobID {
+			return
+		}
+	}
+	e.takeovers = append(e.takeovers, TakeoverRecord{
+		At: now, RoundID: w.roundID, JobID: w.jobID,
+		WorkerID: w.id, WorkerClass: w.class, Remaining: w.job.Service,
+	})
 }
 
 func (e *Engine) checkAccounting() error {
